@@ -115,7 +115,7 @@ GLMakie.activate!()
 tree_plot(T, 1) # the last parameter is the rooted metabolite index
 ```
 
-![](../assets/prefix.png)
+![](../assets/toy-network-1-chmc-tree_plot.png)
 
 If using the GLMakie backend, ensure OpenGL is installed on your machine
 and accessible by Julia. The GLMakie plot is interactive and allows users
@@ -123,6 +123,6 @@ to drag nodes and zoom in/out. Otherwise, you could choose another backend
 such as CairoMakie to generate and save a static plot. A prettier,
 hand-coded version of the transformed network is shown below.
 
-![](../assets/toy-network-1-prefix.png)
+![](../assets/toy-network-1-chmc.png)
 
 

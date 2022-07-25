@@ -3,32 +3,21 @@
 ## Plot toy network as PNG
 # Generate PNG
 pdflatex -shell-escape toy-network-1.tex
-pdflatex -shell-escape toy-network-1-prefix.tex
+pdflatex -shell-escape toy-network-1-chmc.tex
 
 # Convert to PDF
-#convert               \
-   #-verbose           \
-   #-density 500       \
-   #-trim              \
-    #toy-network-1.pdf \
-   #-quality 100       \
-   #-flatten           \
-   #-sharpen 0x1.0     \
-   #+repage      \
-    #toy-network-1.png
-
 convert toy-network-1.png -gravity East -chop 674x0 toy-network-1.png
 convert toy-network-1.png -gravity West -chop 633x0 toy-network-1.png
 
 rm toy-network-1.aux toy-network-1.log
-rm toy-network-1-prefix.aux toy-network-1-prefix.log
+rm toy-network-1-chmc.aux toy-network-1-chmc.log
 mv toy-network-1.png ../assets/
-mv toy-network-1-prefix.png ../assets/
+mv toy-network-1-chmc.png ../assets/
 
-julia toy-network-1-prefix.jl
+julia toy-network-1-chmc.jl
 
-convert prefix.png -gravity East -chop 250x0 prefix.png
-convert prefix.png -gravity West -chop 250x0 prefix.png
+convert toy-network-1-chmc-tree_plot.png -gravity East -chop 250x0 toy-network-1-chmc-tree_plot.png
+convert toy-network-1-chmc-tree_plot.png -gravity West -chop 250x0 toy-network-1-chmc-tree_plot.png
 
-mv prefix.png ../assets/
+mv toy-network-1-chmc-tree_plot.png ../assets/
 

@@ -28,6 +28,6 @@ CairoMakie.activate!(type = "png")
 
 # Plot and save
 fig = tree_plot(T, 1)
-save("prefix.png", fig)
+save("toy-network-1-chmc-tree_plot.png", fig)
 
 
