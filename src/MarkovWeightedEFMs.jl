@@ -15,7 +15,7 @@ module MarkovWeightedEFMs
 
   using QuantEcon: MarkovChain, stationary_distributions
 
-  include("cycle-history-mc.jl")
+  include("cycle-history-markov-chain.jl")
   export steady_state_efm_distribution
   export stoich_to_transition
   export reshape_efm_matrix, reshape_efm_vector
