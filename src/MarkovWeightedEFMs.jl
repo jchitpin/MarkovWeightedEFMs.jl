@@ -1,5 +1,22 @@
 module MarkovWeightedEFMs
 
-greet() = print("Hello World!")
+  using Test
 
+  using Statistics: mean
+  using GeometryBasics: Point
+  using Makie: Combined, deregister_interaction!, autolimits!, limits!
+  using Makie: register_interaction!, hidedecorations!, hidespines!, DataAspect
+  using Graphs: SimpleDiGraph
+  using NetworkLayout: Buchheim
+  using GraphMakie: graphplot, NodeDragHandler
+
+  include("plot-cycle-history-markov-chain.jl")
+  export tree_plot
+
+  using QuantEcon: MarkovChain, stationary_distributions
+
+  include("cycle-history-mc.jl")
+  export steady_state_efm_distribution
+  export stoich_to_transition
+  export reshape_efm_matrix, reshape_efm_vector
 end # module
