@@ -1,4 +1,4 @@
-using ElementaryFluxModes
+using MarkovWeightedEFMs
 using CairoMakie
 
 # Figure 1b) in the manuscript; stoichiometry matrix, fluxes, efms,
