@@ -10,7 +10,6 @@ function sanitize_transition(T::Matrix{<:Real}, I::Int64)
   )
 end
 
-
 function trie(T::Matrix{<:Real}, I::Int64=1)
 
   # Initialize dictionary of prefix and children
