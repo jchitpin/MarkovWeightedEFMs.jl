@@ -2,6 +2,10 @@
 function sanitize_stoich(S::Matrix{<:Int64})
   subs = length.([findall(<(0), S[:,i]) for i in 1:size(S,2)])
   prods = length.([findall(>(0), S[:,i]) for i in 1:size(S,2)])
+  [@assert(#
+    !(all(S[:,j] .== 0)),
+    "Reaction column cannot be empty (all zeroes)."
+  ) for j in 1:size(S,2)]
   @assert(#
     all(subs .∈ Ref([0, 1])),
     join([#
