@@ -4,8 +4,19 @@ function sanitize_stoich(S::Matrix{<:Int64})
   prods = length.([findall(>(0), S[:,i]) for i in 1:size(S,2)])
   [@assert(#
     !(all(S[:,j] .== 0)),
-    "Reaction column cannot be empty (all zeroes)."
+    join([#
+      "Reaction column in S cannot contain all zeros. ",
+      "(A reaction must involve at least one metabolite being produced or ",
+      "consumed)"
+     ])
   ) for j in 1:size(S,2)]
+  [@assert(#
+    !(all(S[i,:] .== 0)),
+    join([#
+      "Metabolite row in S cannot contain all zeros. ",
+      "(A metabolite must participate in at least one reaction."
+    ])
+  ) for i in 1:size(S,1)]
   @assert(#
     all(subs .∈ Ref([0, 1])),
     join([#
