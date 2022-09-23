@@ -112,6 +112,7 @@ root if this parameter is omitted. To visualize the transformed network:
 ```julia
 using GLMakie # Makie backend
 GLMakie.activate!()
+T = stoich_to_transition(S, v) # transition probability matrix of the network
 tree_plot(T, 1) # the last parameter is the rooted metabolite index
 ```
 
@@ -122,6 +123,10 @@ and accessible by Julia. The GLMakie plot is interactive and allows users
 to drag nodes and zoom in/out. Otherwise, you could choose another backend
 such as CairoMakie to generate and save a static plot. A prettier,
 hand-coded version of the transformed network is shown below.
+
+The blue node is the root of the tree and the green nodes indicate that
+there is an edge back up to the root. By default, these arrows are omitted
+to avoid cluttering the plot.
 
 ![](../assets/toy-network-1-chmc.png)
 
