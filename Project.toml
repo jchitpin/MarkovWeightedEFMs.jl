@@ -1,7 +1,7 @@
 name = "MarkovWeightedEFMs"
 uuid = "027c7a2e-6f0c-49f6-bdce-894140f3c472"
 authors = ["Justin Chitpin <jchit069@uottawa.ca>"]
-version = "1.0.0"
+version = "1.1.0"
 
 [deps]
 GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"

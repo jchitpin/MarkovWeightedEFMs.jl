@@ -212,7 +212,7 @@ function enumerate_efms(#
   }
 )
 
-  # Prefixes with cycle-history states
+  # Prefixes with cycle-history Markov chain states
   prefixes = collect(keys(d))
   prefixes_transformed = Vector{Vector{Int64}}(undef, length(prefixes))
   for i in 1:length(prefixes)
@@ -226,9 +226,9 @@ function enumerate_efms(#
     prefixes_transformed[i] = temp
   end
 
-  # For each prefix sequence, check if the last state can complete a simple
-  # cycle by revisiting a previous state in the sequence
-  # These are the EFM simple cycles
+  # For each CHMC prefix, check if the last state transitions back to a CHMC
+  # state already contained in the prefix. (Transitioning "up" the prefix tree)
+  # These simple cycles represent the EFMs
   simple_cycles_transformed = Vector{Vector{Int64}}()
   for i in 1:length(prefixes)
     upstream = findall(>(0), T′[prefixes_transformed[i][end],:])
@@ -255,20 +255,45 @@ function enumerate_efms(#
     push!(simple_cycles_original, temp)
   end
 
-  # Aggregate cycle history cycles over the same EFM
+  # Aggregate CHMC simple cycles over each EFM
   res = NamedTuple{#
     (:EFM, :TransformedCycles),
     Tuple{Vector{Int64}, Vector{Vector{Int64}}}
   }[]
+  simple_cycles_original_2 = [i[2:end] for i in simple_cycles_original]
   while !isempty(simple_cycles_original)
-    idx = findall(#
-      in(Ref(Set(simple_cycles_original[1][2:end]))),
-      [Set(i[2:end]) for i in simple_cycles_original]
+    # Find all simple cycles corresponding to the same EFM
+    tmp = simple_cycles_original_2[1]
+    tmp = [tmp[[i:length(tmp); collect(1:(i-1))]] for i in 1:length(tmp)]
+    ids = vcat(#
+      [findall(simple_cycles_original_2 .== Ref(tmp[i])) for i in 1:length(tmp)]
+    ...)
+    push!(#
+      res,
+      (#
+        EFM=simple_cycles_original[1],
+        TransformedCycles=simple_cycles_transformed[ids]
+      )
     )
-    push!(res, (EFM=simple_cycles_original[1], TransformedCycles=simple_cycles_transformed[idx]))
-    splice!(simple_cycles_original, idx)
-    splice!(simple_cycles_transformed, idx)
+    splice!(simple_cycles_original, sort(ids))
+    splice!(simple_cycles_original_2, sort(ids))
+    splice!(simple_cycles_transformed, sort(ids))
   end
+
+  # Aggregate CHMC simple cycles over each EFM
+  #res = NamedTuple{#
+    #(:EFM, :TransformedCycles),
+    #Tuple{Vector{Int64}, Vector{Vector{Int64}}}
+  #}[]
+  #while !isempty(simple_cycles_original)
+    #idx = findall(#
+      #in(Ref(Set(simple_cycles_original[1][2:end]))),
+      #[Set(i[2:end]) for i in simple_cycles_original]
+    #)
+    #push!(res, (EFM=simple_cycles_original[1], TransformedCycles=simple_cycles_transformed[idx]))
+    #splice!(simple_cycles_original, idx)
+    #splice!(simple_cycles_transformed, idx)
+  #end
   return res
 end
 
