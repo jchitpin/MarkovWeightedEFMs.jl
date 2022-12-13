@@ -21,7 +21,7 @@ module MarkovWeightedEFMs
 
   using MATLAB
 
-  include("higher-order-generalization.jl")
-  export steady_state_efm_distribution_higher
+  #include("higher-order-generalization.jl")
+  #export steady_state_efm_distribution_higher
 
 end # module

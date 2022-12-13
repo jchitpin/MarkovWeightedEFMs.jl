@@ -271,6 +271,8 @@ function steady_state_efm_distribution(#
   I::Int64=1
 )
 
+  # Check for open network and return closed stoichiometry matrix and flux vector
+
   # Check S and v and generate transition probability matrix
   T = stoich_to_transition(S, v)
 
@@ -298,6 +300,8 @@ function steady_state_efm_distribution(#
   c = [length(ϕ[i].EFM)-1 for i in 1:length(ϕ)]
   α = sum(v) / sum(p .* c)
   w = p * α
+
+  # If network was originally open, 
 
   return (e=e, p=p, w=w)
 end
