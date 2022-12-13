@@ -1,7 +1,6 @@
 module MarkovWeightedEFMs
 
   using Test
-
   using Statistics: mean
   using GeometryBasics: Point
   using Makie: Combined, deregister_interaction!, autolimits!, limits!
@@ -19,4 +18,10 @@ module MarkovWeightedEFMs
   export steady_state_efm_distribution
   export stoich_to_transition
   export reshape_efm_matrix, reshape_efm_vector
+
+  using MATLAB
+
+  include("higher-order-generalization.jl")
+  export steady_state_efm_distribution_higher
+
 end # module
