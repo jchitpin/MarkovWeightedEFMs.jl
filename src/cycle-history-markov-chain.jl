@@ -64,6 +64,15 @@ function sanitize_transition_matrix(T::Matrix{<:AbstractFloat})
     ])
   )
 end
+function sanitize_open_stoich(S::Matrix{<:Int64})
+  col_source = findall(==(1), vec(sum(S, dims=1)))
+  col_sink = findall(==(-1), vec(sum(S, dims=1)))
+  bool = all([!isempty(col_source), !isempty(col_sink)])
+  @assert(#
+    bool,
+    "An open network must contain at least one source and sink reaction."
+  )
+end
 function sanitize_initial(I::Int64, s::Int64)
   @assert(0 < I <= s, "I must belong in size(T,1).")
 end
@@ -84,6 +93,147 @@ function sanitize_efms(ϕ::Vector{Vector{Int64}}, s::Int64)
   for e in ϕ
     @assert(all(e .∈ Ref(1:s)), "EFM $e does not match transition matrix T.")
   end
+end
+
+# Main function (count EFMs and compute steady state probabilities/weights)
+"""
+    steady_state_efm_distribution(#
+        S::Matrix{<:Int64},
+        v::Vector{<:Real},
+        I::Int64=1
+    )
+
+Enumerates the EFMs from stoichiometry matrix S and compute the
+steady state probabilities of each EFM according to the cycle-history,
+discrete-time Markov chain model.
+
+*S* is a fully-connected, unimolecular, m by n stoichiometry matrix with m
+metabolites and n reactions.
+
+*v* is the n-length steady state flux vector associated with *S*.
+
+*I* is the initial starting state for rooting the cycle-history Markov chain.
+The choice of initial starting state does not affect the steady state EFM
+probabilities. The default is 1 and must be a whole number between 1:m.
+
+# Example
+```julia
+julia> S = [#
+ -1  0  0  0  0  0  0  0  0  0  1
+  1 -1  1 -1  0  0  0  0  0  0  0
+  0  1 -1  0 -1  1  0  0  0  0  0
+  0  0  0  1  0  0 -1  0  0  0  0
+  0  0  0  0  1 -1  1 -1  1 -1  0
+  0  0  0  0  0  0  0  0  0  1 -1
+  0  0  0  0  0  0  0  1 -1  0  0
+];
+julia> v = [3, 2, 1, 2, 3, 2, 2, 1, 1, 3, 3];
+julia> res = steady_state_efm_distribution(S, v);
+julia> res.e # EFM state sequences
+6-element Vector{Vector{Int64}}:
+ [3, 2, 3]
+ [5, 3, 5]
+ [7, 5, 7]
+ [6, 1, 2, 4, 5, 6]
+ [3, 2, 4, 5, 3]
+ [6, 1, 2, 3, 5, 6]
+
+julia> res.p # EFM probabilities
+6-element Vector{Float64}:
+ 0.10638297872340426
+ 0.25531914893617025
+ 0.14893617021276595
+ 0.25531914893617025
+ 0.0425531914893617
+ 0.1914893617021277
+
+julia> res.w # EFM weights
+6-element Vector{Float64}:
+ 0.7142857142857142
+ 1.7142857142857144
+ 0.9999999999999999
+ 1.7142857142857144
+ 0.2857142857142857
+ 1.2857142857142858
+```
+"""
+function steady_state_efm_distribution(#
+  S::Matrix{<:Int64},
+  v::Vector{<:Real},
+  I::Int64=1
+)
+
+  # Check if network is open or closed
+  status = check_open_closed(S)
+
+  # Open network check and stoichiometry/flux vector modification
+  if status == "open"
+    S = close_network(S)
+  end
+
+  # Check S and v and generate transition probability matrix
+  T = stoich_to_transition(S, v)
+
+  # Construct cycle-history transition probability matrix and prefix dictionary
+  T′, d = trie_matrix(T, I)
+
+  # Enumerate all EFMs/simple cycles from the cycle-history matrix/prefix
+  ϕ = enumerate_efms(T′, d)
+  e = [ϕ[i].EFM for i in 1:length(ϕ)]
+
+  # Compute the steady state probabilities of being at a given state
+  mc = MarkovChain(T′)
+  π = stationary_distributions(mc)[1]
+
+  # Compute steady state edge probabilities and aggregate for each EFM
+  p = Vector{Float64}(undef, length(ϕ))
+  for i in 1:length(ϕ)
+    for j in ϕ[i].TransformedCycles
+      p[i] += π[j[1]] * T′[j[1], j[2]]
+    end
+  end
+  p = p ./ sum(p)
+
+  # Compute EFM weights from proportionality constant
+  c = [length(ϕ[i].EFM)-1 for i in 1:length(ϕ)]
+  α = sum(v) / sum(p .* c)
+  w = p * α
+
+  # Remove pseudo metabolite from EFMs in an open-network
+  if status == "open"
+    filter!.(i -> i != 1, e) # Remove '1' index for pseudo metabolite
+    e = e .|> i->i.-1  # Subtract '1' from all EFM indices
+  end
+
+  return (e=e, p=p, w=w)
+end
+
+function check_open_closed(S::Matrix{<:Int64})
+  col_source = findall(==(1), vec(sum(S, dims=1)))
+  col_sink = findall(==(-1), vec(sum(S, dims=1)))
+
+  if isempty(col_source) && isempty(col_sink)
+    return "closed"
+  else
+    sanitize_open_stoich(S)
+    return "open"
+  end
+end
+
+function close_network(S::Matrix{<:Int64})
+  # Error-checking for a unimolecular network with steady state fluxes
+  sanitize_flux(v)
+  sanitize_stoich_flux(S, v)
+
+  # Indices of source/sink columns
+  col_source = findall(==(1), vec(sum(S, dims=1)))
+  col_sink = findall(==(-1), vec(sum(S, dims=1)))
+
+  # Close off stoichiometry matrix
+  rvec = zeros(Int64, size(S,2))
+  rvec[col_source] .= -1
+  rvec[col_sink] .= 1
+  return vcat(rvec', S)
 end
 
 # Stoichiometry to transition probability matrix
@@ -203,107 +353,98 @@ function trie_matrix(#
   return A, t
 end
 
-# Main function (count EFMs and compute steady state probabilities/weights)
-"""
-    steady_state_efm_distribution(#
-        S::Matrix{<:Int64},
-        v::Vector{<:Real},
-        I::Int64=1
-    )
-
-Enumerates the EFMs from stoichiometry matrix S and compute the
-steady state probabilities of each EFM according to the cycle-history,
-discrete-time Markov chain model.
-
-*S* is a fully-connected, unimolecular, m by n stoichiometry matrix with m
-metabolites and n reactions.
-
-*v* is the n-length steady state flux vector associated with *S*.
-
-*I* is the initial starting state for rooting the cycle-history Markov chain.
-The choice of initial starting state does not affect the steady state EFM
-probabilities. The default is 1 and must be a whole number between 1:m.
-
-# Example
-```julia
-julia> S = [#
- -1  0  0  0  0  0  0  0  0  0  1
-  1 -1  1 -1  0  0  0  0  0  0  0
-  0  1 -1  0 -1  1  0  0  0  0  0
-  0  0  0  1  0  0 -1  0  0  0  0
-  0  0  0  0  1 -1  1 -1  1 -1  0
-  0  0  0  0  0  0  0  0  0  1 -1
-  0  0  0  0  0  0  0  1 -1  0  0
-];
-julia> v = [3, 2, 1, 2, 3, 2, 2, 1, 1, 3, 3];
-julia> res = steady_state_efm_distribution(S, v);
-julia> res.e # EFM state sequences
-6-element Vector{Vector{Int64}}:
- [3, 2, 3]
- [5, 3, 5]
- [7, 5, 7]
- [6, 1, 2, 4, 5, 6]
- [3, 2, 4, 5, 3]
- [6, 1, 2, 3, 5, 6]
-
-julia> res.p # EFM probabilities
-6-element Vector{Float64}:
- 0.10638297872340426
- 0.25531914893617025
- 0.14893617021276595
- 0.25531914893617025
- 0.0425531914893617
- 0.1914893617021277
-
-julia> res.w # EFM weights
-6-element Vector{Float64}:
- 0.7142857142857142
- 1.7142857142857144
- 0.9999999999999999
- 1.7142857142857144
- 0.2857142857142857
- 1.2857142857142858
-```
-"""
-function steady_state_efm_distribution(#
-  S::Matrix{<:Int64},
-  v::Vector{<:Real},
-  I::Int64=1
+# Enumerate EFMs via counting simple cycles
+function enumerate_efms(#
+  T′::Matrix{Float64},
+  d::Dict{#
+    Vector{Int64},
+    NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+  }
 )
 
-  # Check for open network and return closed stoichiometry matrix and flux vector
+  # Prefixes with cycle-history Markov chain states
+  prefixes = collect(keys(d))
+  prefixes_transformed = Vector{Vector{Int64}}(undef, length(prefixes))
+  for i in 1:length(prefixes)
+    temp = Vector{Int64}()
+    for j in 1:length(prefixes[i])
+      push!(#
+        temp,
+        parse(Int64, d[prefixes[i][1:j]].id[2:end])
+      )
+    end
+    prefixes_transformed[i] = temp
+  end
 
-  # Check S and v and generate transition probability matrix
-  T = stoich_to_transition(S, v)
-
-  # Construct cycle-history transition probability matrix and prefix dictionary
-  T′, d = trie_matrix(T, I)
-
-  # Enumerate all EFMs/simple cycles from the cycle-history matrix/prefix
-  ϕ = enumerate_efms(T′, d)
-  e = [ϕ[i].EFM for i in 1:length(ϕ)]
-
-  # Compute the steady state probabilities of being at a given state
-  mc = MarkovChain(T′)
-  π = stationary_distributions(mc)[1]
-
-  # Compute steady state edge probabilities and aggregate for each EFM
-  p = Vector{Float64}(undef, length(ϕ))
-  for i in 1:length(ϕ)
-    for j in ϕ[i].TransformedCycles
-      p[i] += π[j[1]] * T′[j[1], j[2]]
+  # For each CHMC prefix, check if the last state transitions back to a CHMC
+  # state already contained in the prefix. (Transitioning "up" the prefix tree)
+  # These simple cycles represent the EFMs
+  simple_cycles_transformed = Vector{Vector{Int64}}()
+  for i in 1:length(prefixes)
+    upstream = findall(>(0), T′[prefixes_transformed[i][end],:])
+    for j in 1:length(upstream)
+      idx = findfirst(prefixes_transformed[i] .== upstream[j])
+      if ~isnothing(idx)
+        cycle = [prefixes_transformed[i][end]; prefixes_transformed[i][idx:end]]
+        push!(simple_cycles_transformed, cycle)
+      end
     end
   end
-  p = p ./ sum(p)
 
-  # Compute EFM weights from proportionality constant
-  c = [length(ϕ[i].EFM)-1 for i in 1:length(ϕ)]
-  α = sum(v) / sum(p .* c)
-  w = p * α
+  # Convert simple cycle history states back to regular states
+  e = Dict(parse(Int64, d[k].id[2:end]) => k[end] for k in keys(d))
+  simple_cycles_original = Vector{Vector{Int64}}()
+  for i in 1:length(simple_cycles_transformed)
+    temp = Vector{Int64}()
+    for j in 1:length(simple_cycles_transformed[i])
+      push!(#
+        temp,
+        e[simple_cycles_transformed[i][j]]
+      )
+    end
+    push!(simple_cycles_original, temp)
+  end
 
-  # If network was originally open, 
+  # Aggregate CHMC simple cycles over each EFM
+  res = NamedTuple{#
+    (:EFM, :TransformedCycles),
+    Tuple{Vector{Int64}, Vector{Vector{Int64}}}
+  }[]
+  simple_cycles_original_2 = [i[2:end] for i in simple_cycles_original]
+  while !isempty(simple_cycles_original)
+    # Find all simple cycles corresponding to the same EFM
+    tmp = simple_cycles_original_2[1]
+    tmp = [tmp[[i:length(tmp); collect(1:(i-1))]] for i in 1:length(tmp)]
+    ids = vcat(#
+      [findall(simple_cycles_original_2 .== Ref(tmp[i])) for i in 1:length(tmp)]
+    ...)
+    push!(#
+      res,
+      (#
+        EFM=simple_cycles_original[1],
+        TransformedCycles=simple_cycles_transformed[ids]
+      )
+    )
+    splice!(simple_cycles_original, sort(ids))
+    splice!(simple_cycles_original_2, sort(ids))
+    splice!(simple_cycles_transformed, sort(ids))
+  end
 
-  return (e=e, p=p, w=w)
+  # Aggregate CHMC simple cycles over each EFM
+  #res = NamedTuple{#
+    #(:EFM, :TransformedCycles),
+    #Tuple{Vector{Int64}, Vector{Vector{Int64}}}
+  #}[]
+  #while !isempty(simple_cycles_original)
+    #idx = findall(#
+      #in(Ref(Set(simple_cycles_original[1][2:end]))),
+      #[Set(i[2:end]) for i in simple_cycles_original]
+    #)
+    #push!(res, (EFM=simple_cycles_original[1], TransformedCycles=simple_cycles_transformed[idx]))
+    #splice!(simple_cycles_original, idx)
+    #splice!(simple_cycles_transformed, idx)
+  #end
+  return res
 end
 
 # Convert matrix of EFMs to nested vector (rows are reactions; cols are EFMs)

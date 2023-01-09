@@ -2,3 +2,4 @@ Manifest.toml
 src/higher-order-generalization.jl
 src/higher-order-catalyst.jl
 src/scn.jl
+src/higher-order-gen2.jl

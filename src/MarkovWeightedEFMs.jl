@@ -17,9 +17,10 @@ module MarkovWeightedEFMs
   include("cycle-history-markov-chain.jl")
   export steady_state_efm_distribution
   export stoich_to_transition
+  export enumerate_efms
   export reshape_efm_matrix, reshape_efm_vector
 
-  using MATLAB
+  #using MATLAB
 
   #include("higher-order-generalization.jl")
   #export steady_state_efm_distribution_higher
