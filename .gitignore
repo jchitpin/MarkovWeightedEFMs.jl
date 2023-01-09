@@ -3,3 +3,4 @@ src/higher-order-generalization.jl
 src/higher-order-catalyst.jl
 src/scn.jl
 src/higher-order-gen2.jl
+src/higher-order-simulation.jl
