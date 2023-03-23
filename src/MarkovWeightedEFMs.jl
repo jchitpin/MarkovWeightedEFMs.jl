@@ -12,7 +12,8 @@ module MarkovWeightedEFMs
   include("plot-cycle-history-markov-chain.jl")
   export tree_plot
 
-  using QuantEcon: MarkovChain, stationary_distributions
+  #using QuantEcon: MarkovChain, stationary_distributions
+  using ArnoldiMethod: partialschur
 
   include("cycle-history-markov-chain.jl")
   export steady_state_efm_distribution
@@ -20,8 +21,8 @@ module MarkovWeightedEFMs
   export enumerate_efms
   export reshape_efm_matrix, reshape_efm_vector
 
-  #using MATLAB
 
+  #using MATLAB
   #include("higher-order-generalization.jl")
   #export steady_state_efm_distribution_higher
 

@@ -10,43 +10,6 @@ function sanitize_transition(T::Matrix{<:Real}, I::Int64)
   )
 end
 
-function trie(T::Matrix{<:Real}, I::Int64=1)
-
-  # Initialize dictionary of prefix and children
-  d = Dict{#
-    Vector{Int64},
-    Vector{Int64}
-  }()
-  function traverse_trie(#
-    prefix::Vector{Int64},
-    T::Matrix{<:Real},
-    d::Dict{#
-      Vector{Int64}, Vector{Int64}
-    }
-  )
-    downstream = filter!(x -> x ∉ prefix, findall(>(0), T[prefix[end],:]))
-    d[prefix] = downstream
-    for p in downstream
-      traverse_trie([prefix; p], T, d)
-    end
-  end
-
-  # Construct dictionary of prefix and children and add unique IDs
-  traverse_trie([I], T, d)
-  v1 = ["X" * string(i) for i in 1:length(keys(d))]
-  v2 = collect(values(d))
-
-  # Ensure root node/prefix is variable "X1"
-  root_idx = findfirst([collect(keys(d))[i][end] == I for i in 1:length(d)])
-  switch_idx = findfirst(v1 .== "X1")
-  v1[switch_idx] = v1[root_idx]
-  v1[root_idx] = "X1"
-
-  vs = [(id=v1[i], children=v2[i]) for i in 1:length(v1)]
-
-  return Dict(zip(keys(d), vs))
-end
-
 """
     function tree_plot(#
         T::Matrix{<:Real},

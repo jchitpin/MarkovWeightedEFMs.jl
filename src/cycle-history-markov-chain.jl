@@ -1,4 +1,4 @@
-# Error checking helpers for steady_state_(c/d)tmc_efm_distribution
+# Error checking helpers for steady_state_efm_distribution
 function sanitize_stoich(S::Matrix{<:Int64})
   subs = length.([findall(<(0), S[:,i]) for i in 1:size(S,2)])
   prods = length.([findall(>(0), S[:,i]) for i in 1:size(S,2)])
@@ -95,7 +95,8 @@ function sanitize_efms(ϕ::Vector{Vector{Int64}}, s::Int64)
   end
 end
 
-# Main function (count EFMs and compute steady state probabilities/weights)
+
+## Main function (count EFMs and compute steady state probabilities/weights)
 """
     steady_state_efm_distribution(#
         S::Matrix{<:Int64},
@@ -158,7 +159,7 @@ julia> res.w # EFM weights
 ```
 """
 function steady_state_efm_distribution(#
-  S::Matrix{<:Int64},
+  S::Matrix{<:Integer},
   v::Vector{<:Real},
   I::Int64=1
 )
@@ -179,11 +180,11 @@ function steady_state_efm_distribution(#
 
   # Enumerate all EFMs/simple cycles from the cycle-history matrix/prefix
   ϕ = enumerate_efms(T′, d)
-  e = [ϕ[i].EFM for i in 1:length(ϕ)]
+  e = first.(ϕ)
 
   # Compute the steady state probabilities of being at a given state
-  mc = MarkovChain(T′)
-  π = stationary_distributions(mc)[1]
+  decomp, _ = partialschur(T′', nev=1)
+  π = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
 
   # Compute steady state edge probabilities and aggregate for each EFM
   p = Vector{Float64}(undef, length(ϕ))
@@ -192,22 +193,58 @@ function steady_state_efm_distribution(#
       p[i] += π[j[1]] * T′[j[1], j[2]]
     end
   end
-  p = p ./ sum(p)
 
   # Compute EFM weights from proportionality constant
-  c = [length(ϕ[i].EFM)-1 for i in 1:length(ϕ)]
+  c = length.(first.(ϕ)) .- 1
   α = sum(v) / sum(p .* c)
   w = p * α
 
   # Remove pseudo metabolite from EFMs in an open-network
   if status == "open"
     filter!.(i -> i != 1, e) # Remove '1' index for pseudo metabolite
-    e = e .|> i->i.-1  # Subtract '1' from all EFM indices
+    e = e .|> i -> i .- 1    # Subtract '1' from all EFM indices
   end
 
-  return (e=e, p=p, w=w)
+  return (e=e, p=p/sum(p), w=w)
 end
 
+## Main function (count EFMs and compute steady state probabilities)
+function steady_state_efm_distribution(#
+  T::Matrix{<:Real},
+  I::Int64=1
+)
+  # Error checking and converting generator into transition matrix
+  @assert(size(T,1) == size(T,2))
+  sanitize_initial(I, size(T,2))
+  if any(T .< 0)
+    [T[i,i] = 0 for i in 1:size(T,1)]
+    T = T ./ sum(T, dims=2)
+  end
+  sanitize_transition_matrix(T)
+
+  # Construct cycle-history transition probability matrix and prefix dictionary
+  T′, d = trie_matrix(T, I)
+
+  # Enumerate all EFMs/simple cycles from the cycle-history matrix/prefix
+  ϕ = enumerate_efms(T′, d)
+  e = first.(ϕ)
+
+  # Compute the steady state probabilities of being at a given state
+  decomp, _ = partialschur(T′', nev=1)
+  π = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
+
+  # Compute steady state edge probabilities and aggregate for each EFM
+  p = Vector{Float64}(undef, length(ϕ))
+  for i in 1:length(ϕ)
+    for j in ϕ[i].TransformedCycles
+      p[i] += π[j[1]] * T′[j[1], j[2]]
+    end
+  end
+
+  return (e=e, p=p/sum(p))
+end
+
+# Check if network is open or closed
 function check_open_closed(S::Matrix{<:Int64})
   col_source = findall(==(1), vec(sum(S, dims=1)))
   col_sink = findall(==(-1), vec(sum(S, dims=1)))
@@ -220,6 +257,7 @@ function check_open_closed(S::Matrix{<:Int64})
   end
 end
 
+# Close network if open
 function close_network(S::Matrix{<:Int64})
   # Error-checking for a unimolecular network with steady state fluxes
   sanitize_flux(v)
@@ -281,16 +319,16 @@ function stoich_to_transition(S::Matrix{<:Real}, v::Vector{<:Real})
   T = zeros(size(S,1), size(S,1))
  
   # Irreversible unimolecular reactions of index i --> index products
-  idx_products = [findall(<(0), S[i,:]) for i in 1:size(S,1)]
+  idx_products = [findall(<(0), @view S[i,:]) for i in 1:size(S,1)]
 
   # Fill probabilities of transition probability matrix
   for i in 1:size(T,1)
     if !isempty(idx_products[i])
       # Indices of products in row i
-      idx_j = vcat([findall(>(0), S[:,j]) for j in idx_products[i]]...)
+      idx_j = vcat([findall(>(0), @view S[:,j]) for j in idx_products[i]]...)
 
       # Assign normalized flux probabilities to transition matrix row i
-      T[i, idx_j] = v[idx_products[i]] / sum(v[idx_products[i]])
+      T[i,idx_j] = v[idx_products[i]] / sum(v[idx_products[i]])
     end
   end
 
@@ -317,10 +355,10 @@ function trie_matrix(#
 
   # Traverse tree and populate new transition probability matrix with trie nodes
   function traverse_trie(#
-    prefix::Vector{Int64},
+    prefix::Vector{Int16},
     t::Dict{#
-      Vector{Int64},
-      NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+      Vector{Int16},
+      NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
     },
     T::Matrix{<:AbstractFloat},
     A::Matrix{Float64}
@@ -348,17 +386,61 @@ function trie_matrix(#
       traverse_trie([prefix; j], t, T, A)
     end
   end
-  traverse_trie([I], t, T, A)
+  traverse_trie(Int16.([I]), t, T, A)
 
   return A, t
+end
+
+function findall_int16(testf::Function, A)
+  T = Int16
+  gen = (first(p) for p in pairs(A) if testf(last(p)))
+  isconcretetype(T) ? collect(T, gen) : collect(gen)
+end
+
+# Construct trie dictionary keyed by prefix with values equal to children
+function trie(T::Matrix{<:Real}, I::Int64=1)
+
+  # Initialize dictionary of prefix and children
+  d = Dict{#
+    Vector{Int16},
+    Vector{Int16}
+  }()
+  function traverse_trie(#
+    prefix::Vector{Int16},
+    T::Matrix{<:Real},
+    d::Dict{#
+      Vector{Int16}, Vector{Int16}
+    }
+  )
+    downstream = filter!(x -> x ∉ prefix, findall_int16(>(0), @view T[prefix[end],:]))
+    d[prefix] = downstream
+    for p in downstream
+      traverse_trie([prefix; p], T, d)
+    end
+  end
+
+  # Construct dictionary of prefix and children and add unique IDs
+  traverse_trie(Int16.([I]), T, d)
+  v1 = ["X" * string(i) for i in 1:length(keys(d))]
+  v2 = collect(values(d))
+
+  # Ensure root node/prefix is variable "X1"
+  root_idx = findfirst([collect(keys(d))[i][end] == I for i in 1:length(d)])
+  switch_idx = findfirst(v1 .== "X1")
+  v1[switch_idx] = v1[root_idx]
+  v1[root_idx] = "X1"
+
+  vs = [(id=v1[i], children=v2[i]) for i in 1:length(v1)]
+
+  return Dict(zip(keys(d), vs))
 end
 
 # Enumerate EFMs via counting simple cycles
 function enumerate_efms(#
   T′::Matrix{Float64},
   d::Dict{#
-    Vector{Int64},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+    Vector{Int16},
+    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
   }
 )
 
@@ -430,24 +512,10 @@ function enumerate_efms(#
     splice!(simple_cycles_transformed, sort(ids))
   end
 
-  # Aggregate CHMC simple cycles over each EFM
-  #res = NamedTuple{#
-    #(:EFM, :TransformedCycles),
-    #Tuple{Vector{Int64}, Vector{Vector{Int64}}}
-  #}[]
-  #while !isempty(simple_cycles_original)
-    #idx = findall(#
-      #in(Ref(Set(simple_cycles_original[1][2:end]))),
-      #[Set(i[2:end]) for i in simple_cycles_original]
-    #)
-    #push!(res, (EFM=simple_cycles_original[1], TransformedCycles=simple_cycles_transformed[idx]))
-    #splice!(simple_cycles_original, idx)
-    #splice!(simple_cycles_transformed, idx)
-  #end
   return res
 end
 
-# Convert matrix of EFMs to nested vector (rows are reactions; cols are EFMs)
+## Convert matrix of EFMs to nested vector (rows are reactions; cols are EFMs)
 """
     reshape_efm_matrix(#
         ϕ::Matrix{Int64},
@@ -537,7 +605,7 @@ function reshape_efm_matrix(#
   return nested_ϕ
 end
 
-# Convert nested vector of EFMs to matrix (rows are reactions; cols are EFMs)
+## Convert nested vector of EFMs to matrix (rows are reactions; cols are EFMs)
 """
     reshape_efm_vector(#
         ϕ::Vector{Vector{Int64}},
