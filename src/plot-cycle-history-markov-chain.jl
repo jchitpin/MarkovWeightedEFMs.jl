@@ -10,6 +10,7 @@ function sanitize_transition(T::Matrix{<:Real}, I::Int64)
   )
 end
 
+# Main function for plotting
 """
     function tree_plot(#
         T::Matrix{<:Real},
@@ -143,8 +144,8 @@ function trie_adj_at_root(#
   function traverse_trie(#
     prefix::Vector{Int64},
     t::Dict{#
-      Vector{Int64},
-      NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+      Vector{Int16},
+      NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
     },
     T::Matrix{<:Real},
     A::Matrix{Float64},
@@ -184,8 +185,8 @@ end
 
 function label_nodes(#
   t::Dict{#
-    Vector{Int64},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+    Vector{Int16},
+    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
   },
 )
   labels = [collect(keys(t))[i][end] for i in 1:length(t)]
@@ -195,8 +196,8 @@ end
 
 function color_nodes(
   t::Dict{#
-    Vector{Int64},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int64}}}
+    Vector{Int16},
+    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
   },
   T::Matrix{<:Real},
   I::Int64;

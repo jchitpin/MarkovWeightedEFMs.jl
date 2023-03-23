@@ -95,7 +95,6 @@ function sanitize_efms(ϕ::Vector{Vector{Int64}}, s::Int64)
   end
 end
 
-
 ## Main function (count EFMs and compute steady state probabilities/weights)
 """
     steady_state_efm_distribution(#
