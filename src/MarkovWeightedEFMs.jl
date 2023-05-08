@@ -12,14 +12,25 @@ module MarkovWeightedEFMs
   include("plot-cycle-history-markov-chain.jl")
   export tree_plot
 
-  #using QuantEcon: MarkovChain, stationary_distributions
+  # Note: Rust compiler required for RXNMapper
+  # https://docs.alliancecan.ca/wiki/Julia
+  using PyCall
+  using PubChemCrawler: get_for_cids, parse_formula
   using ArnoldiMethod: partialschur
+  using MolecularGraph: molecularformula, smilestomol
+  using DataFrames
+  using CSV
 
   include("cycle-history-markov-chain.jl")
   export steady_state_efm_distribution
   export stoich_to_transition
   export enumerate_efms
   export reshape_efm_matrix, reshape_efm_vector
+
+
+
+  include("atom-tracing.jl")
+  export get_cid_info, translate_id, rxn_string
 
 
   #using MATLAB

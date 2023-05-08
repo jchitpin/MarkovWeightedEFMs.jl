@@ -168,7 +168,7 @@ function steady_state_efm_distribution(#
 
   # Open network check and stoichiometry/flux vector modification
   if status == "open"
-    S = close_network(S)
+    S = close_network(S, v)
   end
 
   # Check S and v and generate transition probability matrix
@@ -257,7 +257,7 @@ function check_open_closed(S::Matrix{<:Int64})
 end
 
 # Close network if open
-function close_network(S::Matrix{<:Int64})
+function close_network(S::Matrix{<:Int64}, v::Vector{<:Real})
   # Error-checking for a unimolecular network with steady state fluxes
   sanitize_flux(v)
   sanitize_stoich_flux(S, v)
@@ -462,7 +462,7 @@ function enumerate_efms(#
   # These simple cycles represent the EFMs
   simple_cycles_transformed = Vector{Vector{Int64}}()
   for i in 1:length(prefixes)
-    upstream = findall(>(0), T′[prefixes_transformed[i][end],:])
+    upstream = findall(>(0), @view T′[prefixes_transformed[i][end],:])
     for j in 1:length(upstream)
       idx = findfirst(prefixes_transformed[i] .== upstream[j])
       if ~isnothing(idx)
@@ -683,5 +683,192 @@ function reshape_efm_vector(#
     end
   end
   return E
+end
+
+## Main function (higher order)
+function steady_state_efm_distribution(#
+  S::Matrix{<:Real},
+  v::Vector{<:Real},
+  rs::Vector{String},
+  I::Tuple{Int64,Int64,String,Int64}
+)
+
+  # Trace atoms from mapped smiles strings
+  ms = trace_rxn_string(rs)
+
+  # Atom mappings of the same metabolite across stoichiometric units
+  sm = map_metabolite_across_stoich(S, ms)
+
+  # Atom mapped, unimolecular stoichiometry matrix
+  S′, v′, D = construct_stoichiometry_matrix(S, v, ms, I)
+
+  # Check if network is open or closed
+  status = check_open_closed(S′)
+
+  # Open network check and stoichiometry/flux vector modification
+  if status == "open"
+    S′ = close_network(S′)
+  end
+
+  # Transition probability matrix
+  T = stoich_to_transition(S′, v)
+
+  # Construct cycle-history My faith in the untransition probability matrix and prefix dictionary
+  T′, d = trie_matrix(T, I[2])
+
+  # Enumerate all EFMs/simple cycles from the cycle-history matrix/prefix
+  ϕ = enumerate_efms(T′, d)
+  e = first.(ϕ)
+
+  # Compute the steady state probabilities of being at a given state
+  decomp, _ = partialschur(T′', nev=1)
+  π = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
+
+  # Compute steady state edge probabilities and aggregate for each EFM
+  p = Vector{Float64}(undef, length(ϕ))
+  for i in 1:length(ϕ)
+    for j in ϕ[i].TransformedCycles
+      p[i] += π[j[1]] * T′[j[1], j[2]]
+    end
+  end
+
+  # Compute EFM weights from proportionality constant
+  c = length.(first.(ϕ)) .- 1
+  α = sum(v) / sum(p .* c)
+  w = p * α
+
+  # Remove pseudo metabolite from EFMs in an open-network
+  if status == "open"
+    filter!.(i -> i != 1, e) # Remove '1' index for pseudo metabolite
+    e = e .|> i -> i .- 1    # Subtract '1' from all EFM indices
+  end
+
+  return (e=e, p=p/sum(p), w=w, d=D)
+end
+
+## Construct unimolecular stoichiometry matrix from atom tracing
+function construct_stoichiometry_matrix(#
+  S::Matrix{<:Real},
+  v::Vector{<:Real},
+  ms::Vector{String},
+  I::Tuple{Int64,Int64,String,Int64}
+)
+
+  # Get reactions and metabolite states (including atom position)
+  h = stoichiometry_atom_trace(S, ms, I)
+
+  # Pre-allocate and fill new stoichiometry matrix and flux vector
+  middle(x::Tuple{Int64, Tuple{Int64,Int64}, Tuple{Int64,Int64}}) = x[2]
+  cols = first.(h)
+  row_subs = middle.(h)
+  row_prods = last.(h)
+  mets = unique([row_subs; row_prods])
+  d = Dict(zip(mets, 1:length(mets)))
+  invD = Dict(d[k] => k for k in keys(d))
+  S′ = zeros(Int64, length(d), length(cols))
+  v′ = Vector{Float64}(undef, length(v))
+  for j in 1:length(cols)
+    S′[d[row_subs[j]],cols[j]] = -1
+    S′[d[row_prods[j]],cols[j]] = 1
+    v′[j] = v[cols[j]]
+  end
+
+  return S′, v′, invD
+end
+function stoichiometry_atom_trace(#
+  S::Matrix{<:Real},
+  ms::Vector{String},
+  I::Tuple{Int64,Int64,String,Int64}
+)
+  # Initialize history of unique reactions:
+  h = Vector{Tuple{Int64, Tuple{Int64,Int64}, Tuple{Int64,Int64}}}()
+
+  function trace_inner(#
+      S::Matrix{<:Real},
+      ms::Vector{String},
+      history::Vector{Tuple{Int64, Tuple{Int64,Int64}, Tuple{Int64,Int64}}},
+      curr::Tuple{Int64, Int64, String, Int64},
+  )
+    # Convert substrate index to positional index in reaction
+    trace_atom_idx = (#
+      findfirst(==(curr[2]),
+        findall(<(0), @view S[:,curr[1]])
+      ),
+      curr[3],
+      curr[4]
+    )
+
+    # Trace atom in substrate to product
+    if !isempty(ms[curr[1]])
+      prod_atom = trace_atoms(ms[curr[1]], trace_atom_idx)
+
+      # Find all unique reactions
+      i2 = findall(>(0), @view S[:,curr[1]])[prod_atom[1]] # prod row traced atom
+      if (curr[1], (curr[2], curr[4]), (i2, prod_atom[3])) ∉ history
+        push!(history, (curr[1], (curr[2], curr[4]), (i2, prod_atom[3])))
+        kk = findall(<(0), @view S[i2,:])
+        for k in kk
+          trace_inner(S, ms, history, (k,  i2, prod_atom[2], prod_atom[3]))
+        end
+      end
+    end
+  end
+
+  trace_inner(S, ms, h, I)
+  return h
+end
+
+function map_metabolite_across_stoich(S::Matrix{<:Real}, ms::Vector{String})
+  met_map = [] # [(i, j, m), ] # met i; rxn j; m length vector of indices
+  for j in 1:size(S,2)
+    subs_idx = findall(<(0), @view S[:,j])
+    prods_idx = findall(>(0), @view S[:,j])
+    subs_coeff = abs.(@view S[subs_idx,j])
+    prods_coeff = @view S[prods_idx,j]
+
+    idx_neg = findall(subs_coeff .> 1)
+    idx_prod = findall(prods_coeff .> 1)
+    if !isempty(idx_neg) && !isempty(prods_idx)
+      indices_ms_neg = [#
+        [Int64(sum(subs_coeff[1:(i-1)])+1); Int64(sum(subs_coeff[1:i]))]
+        for i in idx_neg
+      ]
+      for k in 1:length(idx_neg)
+        subs = split(#
+          split(ms[j], ">>")[1],
+          "."
+        )[indices_ms_neg[k][1]:indices_ms_neg[k][2]]
+        for l in 1:length(subs)
+          push!(#
+            met_map,
+            (#
+              subs_idx[k], j,
+              parse.(Int64, [m.match for m in eachmatch(r"\d+", subs[l])])
+            )
+          )
+        end
+      end
+      indices_ms_prod = [#
+        [Int64(sum(prods_coeff[1:(i-1)])+1); Int64(sum(prods_coeff[1:i]))]
+        for i in idx_prod
+      ]
+      for k in 1:length(idx_prod)
+        prods = split(#
+          split(ms[j], ">>")[2],
+          "."
+        )[indices_ms_prod[k][1]:indices_ms_prod[k][2]]
+        for l in 1:length(prods)
+          push!(#
+            met_map,
+            (#
+              prods_idx[k], j,
+              parse.(Int64, [m.match for m in eachmatch(r"\d+", prods[l])])
+            )
+          )
+        end
+      end
+    end
+  end
+  return met_map
 end
 

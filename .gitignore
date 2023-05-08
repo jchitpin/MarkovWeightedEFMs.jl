@@ -1,10 +1,11 @@
 Manifest.toml
-src/flow-graphs.jl
+src/atom-tracing.jl
 src/higher-order-catalyst.jl
-src/higher-order-gen2.jl
-src/higher-order-generalization.jl
-src/higher-order-simulation.jl
-src/misc.jl
-src/scn.jl
+src/old/flow-graphs.jl
+src/old/higher-order-gen2.jl
+src/old/higher-order-generalization.jl
+src/old/higher-order-simulation.jl
+src/old/misc.jl
+src/old/scn.jl
 
 
