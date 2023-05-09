@@ -13,6 +13,14 @@ julia> ]
 (@v1.6) pkg> add https://github.com/jchitpin/MarkovWeightedEFMs.jl.git
 ```
 
+Alternatively, you can load the `Pkg` package and install by:
+
+```julia
+julia> using Pkg
+julia> Pkg.add("https://github.com/jchitpin/MarkovWeightedEFMs.jl.git")
+```
+
+
 ## Usage
 
 Once installed, the package is loaded in a `julia` session by typing:
