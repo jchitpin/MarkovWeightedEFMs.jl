@@ -14,18 +14,18 @@ module MarkovWeightedEFMs
 
   # Note: Rust compiler required for RXNMapper
   # https://docs.alliancecan.ca/wiki/Julia for installing Python packages
-  using PyCall
-  using PubChemCrawler: get_for_cids, parse_formula
-  using ArnoldiMethod: partialschur, LR
-  using MolecularGraph: molecularformula, smilestomol
-  using Tables
-  using CSV
-  using DataFrames
 
+  using ArnoldiMethod: partialschur, LR
   include("chmc-standard/chmc-standard.jl")
   export steady_state_efm_distribution
   export stoich_to_transition # for tree_plot
   export reshape_efm_matrix, reshape_efm_vector
+
+  using PyCall
+  using PubChemCrawler: get_for_cids, parse_formula
+  using MolecularGraph: molecularformula, smilestomol
+  using Tables
+  using CSV
 
   include("chmc-atomic/chmc-atomic.jl")
   export steady_state_efm_distribution
@@ -44,6 +44,7 @@ module MarkovWeightedEFMs
 
 
 
+  ##using DataFrames
   ##export get_cid_info, translate_id
 
 end # module

@@ -1,6 +1,6 @@
 # Functions
 
-## Standard CHMC functions
+## CHMC functions
 
 ```@docs
 reshape_efm_matrix
@@ -9,8 +9,6 @@ steady_state_efm_distribution
 stoich_to_transition
 tree_plot
 ```
-
-## Atomic CHMC functions
 
 ```@docs
 ```

@@ -1,3 +1,7 @@
+## Import files in this subfolder
+include("error-checking.jl")
+include("helpers.jl")
+
 ## Main functions
 # CHMC: (unimolecular; computes EFM probabilities and weights)
 """

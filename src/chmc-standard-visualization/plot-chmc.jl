@@ -1,3 +1,7 @@
+## Import files in this subfolder
+include("error-checking.jl")
+include("helpers.jl")
+
 # Main function for plotting
 """
     function tree_plot(#
