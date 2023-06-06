@@ -27,20 +27,20 @@ module MarkovWeightedEFMs
   using Tables
   using CSV
 
-  include("chmc-atomic/chmc-atomic.jl")
-  export steady_state_efm_distribution
-  export rxn_string, trace_rxn_string
-  export get_source_metabolites, get_max_atoms
-  export precompute_atom_tracing_dictionary
-  export count_atomic_chmc_state_space
-  export get_efm_met_sequence
-  export reconstruct_atomic_fluxes
+  #include("chmc-atomic/chmc-atomic.jl")
+  #export steady_state_efm_distribution
+  #export rxn_string, trace_rxn_string
+  #export get_source_metabolites, get_max_atoms
+  #export precompute_atom_tracing_dictionary
+  #export count_atomic_chmc_state_space
+  #export get_efm_met_sequence
+  #export reconstruct_atomic_fluxes
 
-  include("chmc-atomic/io.jl")
-  export export_atomic_chmc
-  export import_atomic_chmc
-  export export_atom_tracing_dictionary
-  export import_atom_tracing_dictionary
+  #include("chmc-atomic/io.jl")
+  #export export_atomic_chmc
+  #export import_atomic_chmc
+  #export export_atom_tracing_dictionary
+  #export import_atom_tracing_dictionary
 
 
 
