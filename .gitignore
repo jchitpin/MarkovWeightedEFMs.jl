@@ -1,11 +1,18 @@
 Manifest.toml
-src/atom-tracing.jl
+src/chmc-atomic/chmc-atomic.jl
+src/chmc-atomic/error-checking.jl
+src/chmc-atomic/helpers.jl
+src/chmc-atomic/io.jl
+src/chmc-atomic-visualization
 src/higher-order-catalyst.jl
+src/old/atom-tracing
+src/old/cycle-history-markov-chain.jl
 src/old/flow-graphs.jl
 src/old/higher-order-gen2.jl
 src/old/higher-order-generalization.jl
 src/old/higher-order-simulation.jl
 src/old/misc.jl
+src/old/plot-cycle-history-markov-chain.jl
 src/old/scn.jl
 
 
