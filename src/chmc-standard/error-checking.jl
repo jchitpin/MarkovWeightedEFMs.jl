@@ -39,6 +39,11 @@ function sanitize_stoich(S::Matrix{<:Int64})
       "substrate converting to one stoichiometric unit of product."
     ])
   )
+  Scols = mapslices(x->[x], S, dims=1)[:]
+  @assert(#
+    length(Scols) == length(unique(Scols)),
+    "Reaction columns in the stoichiometry matrix must be unique."
+  )
 end
 function sanitize_flux(v::Vector{<:Real})
   @assert(all(v .>= 0), "Fluxes must be ≥ 0.")

@@ -179,8 +179,20 @@ function steady_state_efm_distribution(#
   e = first.(ϕ)
 
   # Compute the steady state probabilities of being at a given state
-  decomp, _ = partialschur(T′', nev=1, mindim = 2, maxdim = 4, which=LR())
-  π = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
+  #decomp, _ = partialschur(T′', nev=1, which=LR())
+  #π = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
+  bool = true
+  π = Vector{Float64}(undef, size(T′,1))
+  while bool
+    decomp, history = partialschur(T′', nev=1)
+    if history.converged == true
+      pii = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
+      if all(pii .>= 0)
+        π = pii
+        bool = false
+      end
+    end
+  end
 
   # Compute steady state edge probabilities and aggregate for each EFM
   p = Vector{Float64}(undef, length(ϕ))
