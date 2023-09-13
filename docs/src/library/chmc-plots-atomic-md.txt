@@ -1,0 +1,21 @@
+# Plotting
+
+## CHMC
+
+```@docs
+plot_chmc
+```
+
+## Atomic CHMC
+
+```@docs
+plot_mapped_reaction
+plot_atomic_chmc
+```
+
+## Index
+
+```@index
+Pages = ["chmc-plots.md"]
+```
+

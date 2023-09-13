@@ -7,14 +7,21 @@ push!(LOAD_PATH, "../src/")
 
 makedocs(#
   sitename = "MarkovWeightedEFMs.jl",
-  #format = Documenter.HTML(prettyurls = false),
+  authors = "Justin G. Chitpin",
+  format = Documenter.HTML(prettyurls = false), # comment out for release
   pages = [#
     "Home" => Any[#
       "index.md"
     ],
-    "Manual" => Any[#
-      "tutorials/efm-estimation.md",
-      "functions/cycle-history-markov-chain.md"
+    "Tutorials" => Any[#
+      "tutorials/chmc-standard-metabolic-networks.md",
+      "tutorials/chmc-standard-ion-channels.md",
+      #"tutorials/chmc-atomic.md",
+    ],
+    "Library" => Any[#
+      "library/chmc-standard.md",
+      #"library/chmc-atomic.md",
+      "library/chmc-plots.md",
     ]
   ]
 )
@@ -22,3 +29,4 @@ makedocs(#
 deploydocs(#
     repo="github.com/jchitpin/MarkovWeightedEFMs.jl.git"
 )
+
