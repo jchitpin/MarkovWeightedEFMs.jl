@@ -32,6 +32,5 @@ julia> using MarkovWeightedEFMs
 Please read the docs for a guided tutorial and function descriptions.
 
 ## Citing MarkovWeightedEFMs.jl
-
-Justin G. Chitpin and Theodore J. Perkins, *A Markov constraint to uniquely identify elementary flux mode weights in unimolecular metabolic networks*, biorXiv preprint **biorXiv:2022.07.25.501464**, doi: https://doi.org/10.1101/2022.07.25.501464.
+Chitpin JG, Perkins TJ. *A Markov constraint to uniquely identify elementary flux mode weights in unimolecular metabolic networks*, J Theor Biol. 2023 Oct 5. doi: doi: 10.1016/j.jtbi.2023.111632. PMID: 37804942.
 
