@@ -1,7 +1,7 @@
 module CHMC
     using Reexport: @reexport
     using ProgressMeter
-    using ChunkSplitters: getchunk
+    using ChunkSplitters: index_chunks
     using SparseArrays
     using LinearAlgebra
     using LinearSolve 
