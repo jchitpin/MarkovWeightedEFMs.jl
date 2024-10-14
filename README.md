@@ -69,7 +69,7 @@ biorXiv preprint: https://doi.org/XX.XXXX/XXXX.XX.XX.XXXXXX
 Justin G. Chitpin and Theodore J. Perkins,
 *A Markov constraint to uniquely identify elementary flux mode weights in unimolecular metabolic networks*.
 J Theor Biol. 2023 Nov 7;575:111632.
-doi: 10.1016/j.jtbi.2023.111632. PMID: 37804942.
+doi: [10.1016/j.jtbi.2023.111632](https://doi.org/10.1016/j.jtbi.2023.111632).
 
 ## License
 
