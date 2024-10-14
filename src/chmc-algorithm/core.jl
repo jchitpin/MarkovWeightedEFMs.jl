@@ -231,8 +231,6 @@ function parallel_simple_cycles_to_efms(#
     
     ids = collect(index_chunks(x; n=len))
     Threads.@threads for i in 1:len
-        #local id = getchunk(sc_o2, i, len)
-        #x[i], y[i] = group_simple_cycles(sc_o2[id], sc_mc[id], sc_chmc[id])
         x[i], y[i] = group_simple_cycles(sc_o2[ids[i]], sc_mc[ids[i]], sc_chmc[ids[i]])
         if verbose == true
             next!(p)
