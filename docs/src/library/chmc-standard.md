@@ -8,8 +8,6 @@ MarkovWeightedEFMs.CHMC.Standard.steady_state_efm_distribution(T::Matrix{<:Real}
 stoichiometry_to_transition_matrix
 reshape_efm_matrix
 reshape_efm_vector
-export_chmc(fname::String, res::CHMCStandardSummary)
-MarkovWeightedEFMs.CHMC.import_chmc
 ```
 
 ## Index

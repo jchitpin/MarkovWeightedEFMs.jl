@@ -118,13 +118,4 @@ to avoid cluttering the plot.
 
 ![](../assets/toy-network-1-chmc.png)
 
-## Exporting/importing the CHMC results
-
-```julia
-fname = "chmc-results.txt"
-export_chmc(fname, res) # save results to text
-res2 = import_chmc(fname) # load results
-res == res2 # should evaluate as true
-```
-
 

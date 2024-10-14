@@ -6,24 +6,29 @@ using MarkovWeightedEFMs
 push!(LOAD_PATH, "../src/")
 
 makedocs(#
-  sitename = "MarkovWeightedEFMs.jl",
-  authors = "Justin G. Chitpin",
-  format = Documenter.HTML(prettyurls = false), # comment out for release
-  pages = [#
-    "Home" => Any[#
-      "index.md"
-    ],
-    "Tutorials" => Any[#
-      "tutorials/chmc-standard-metabolic-networks.md",
-      "tutorials/chmc-standard-ion-channels.md",
-      #"tutorials/chmc-atomic.md",
-    ],
-    "Library" => Any[#
-      "library/chmc-standard.md",
-      #"library/chmc-atomic.md",
-      "library/chmc-plots.md",
+    sitename = "MarkovWeightedEFMs.jl",
+    authors = "Justin G. Chitpin",
+    format = Documenter.HTML(prettyurls = true), # comment out for release
+    pages = [#
+        "Home" => Any[#
+            "index.md"
+        ],
+        "Installation" => Any[#
+            "installation/installation.md"
+        ],
+        "Tutorials" => Any[#
+            "tutorials/chmc-standard-metabolic-networks.md",
+            "tutorials/chmc-standard-ion-channels.md",
+            "tutorials/chmc-atomic-glucose.md",
+            "tutorials/boilerplate-for-bigg-gems.md",
+        ],
+        "Library" => Any[#
+            "library/chmc-standard.md",
+            "library/chmc-atomic.md",
+            "library/chmc-plots-standard.md",
+            "library/chmc-plots-atomic.md",
+        ]
     ]
-  ]
 )
 
 deploydocs(#

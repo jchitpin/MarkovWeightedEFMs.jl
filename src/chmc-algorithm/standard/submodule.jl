@@ -1,4 +1,4 @@
-  module Standard
+module Standard
     using SparseArrays
     using MarkovWeightedEFMs.CHMC: CHMCStandardSummary
     using MarkovWeightedEFMs.CHMC: findall_int16, check_open_closed
@@ -10,8 +10,4 @@
     export stoichiometry_to_transition_matrix
     export reshape_efm_matrix
     export reshape_efm_vector
-
-    include("io.jl")
-    export export_chmc
-  end
-
+end

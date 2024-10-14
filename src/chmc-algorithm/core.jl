@@ -1,486 +1,666 @@
 # Structs
+"""
+Stores results of a standard CHMC.
+
+`e` are the EFM arrays of metabolite index sequences.
+`p` are the EFM probabilities normalized to unity.
+`w` are the EFM weights.
+"""
 struct CHMCStandardSummary
-  e::Vector{Vector{Int64}}
-  p::Vector{Float64}
-  w::Vector{Float64}
+    e::Vector{Vector{Int64}} # EFM metabolite index sequences
+    p::Vector{Float64}
+    w::Vector{Float64}
 end
 
+"""
+Stores properties of the metabolic flux network inputs, including possible
+problems that must be corrected to successfully construct the atomic CHMC.
+The recorded problems are used to automatically corrected via
+[`find_atomic_chmc_input_errors(S::Matrix{<:Real}, v::Vector{<:Real})`](@ref).
+The properties may be printed via [`print(res::CHMCAtomicErrorSummary)`](@ref).
+"""
 struct CHMCAtomicErrorSummary
-  absolute_flux_error::Float64
-  reactions_duplicated::Vector{Int64}
-  reactions_with_zero_flux::Vector{Int64}
-  reactions_with_negative_flux::Vector{Int64}
-  reactions_with_non_integer_stoichiometries::Vector{Int64}
-  reactions_unimolecular_source_stoichiometry_one::Vector{Int64}
-  reactions_unimolecular_source_stoichiometry_not_one::Vector{Int64}
-  reactions_multimolecular_source_stoichiometry_one::Vector{Int64}
-  reactions_multimolecular_source_stoichiometry_not_one::Vector{Int64}
-  reactions_unimolecular_sink_stoichiometry_one::Vector{Int64}
-  reactions_unimolecular_sink_stoichiometry_not_one::Vector{Int64}
-  reactions_multimolecular_sink_stoichiometry_one::Vector{Int64}
-  reactions_multimolecular_sink_stoichiometry_not_one::Vector{Int64}
-  reactions_empty::Vector{Int64}
-  unused_metabolites::Vector{Int64}
+    absolute_flux_error::Float64
+    reactions_duplicated::Vector{Int64}
+    reactions_with_zero_flux::Vector{Int64}
+    reactions_with_negative_flux::Vector{Int64}
+    reactions_with_non_integer_stoichiometries::Vector{Int64}
+    reactions_unimolecular_source_stoichiometry_one::Vector{Int64}
+    reactions_unimolecular_source_stoichiometry_not_one::Vector{Int64}
+    reactions_multimolecular_source_stoichiometry_one::Vector{Int64}
+    reactions_multimolecular_source_stoichiometry_not_one::Vector{Int64}
+    reactions_unimolecular_sink_stoichiometry_one::Vector{Int64}
+    reactions_unimolecular_sink_stoichiometry_not_one::Vector{Int64}
+    reactions_multimolecular_sink_stoichiometry_one::Vector{Int64}
+    reactions_multimolecular_sink_stoichiometry_not_one::Vector{Int64}
+    reactions_empty::Vector{Int64}
+    unused_metabolites::Vector{Int64}
 end
 
+"""
+Stores results of an atomic CHMC.
+
+`i` is the initial starting state (source metabolite index, atom position, chemical symbol).
+`e` are the atomic EFM sequences including the pairs of their simple cycle closures.
+`p` are the atomic EFM probabilities normalized to unity.
+`w` are the atomic EFM weights.
+`dmc` is the dictionary of MC states.
+`dchmc` is the dictionary of CHMC states.
+`T` is the atomic CHMC transition probability matrix.
+`R` are the entries in `T` that transform the atom in state `i` to state `j` by indices `k`.
+"""
 struct CHMCAtomicSummary
-  e::Vector{Vector{Int64}} # EFM sequences
-  p::Vector{Float64} # EFM probabilities
-  w::Vector{Float64} # EFM weights
-  dmc::Dict{Int64, Tuple{Int16,Int16}} # Dictionary of MC states to (met idx/atom idx)
-  i::Tuple{Int64, Int64, String} # Root MC state
-  #T::Matrix{Float64} # CHMC transition matrix
-  T::Union{Matrix{Float64},SparseMatrixCSC{Float64, Int64}} # CHMC transition matrix
-  dchmc::Dict{# Dictionary of CHMC states based on MC states
-    Vector{Int16},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
-  }
-  #R::Matrix{Int16} # CHMC reaction flux matrix
-  R::Union{Matrix{Int16},SparseMatrixCSC{Int16, Int64}} # CHMC reaction flux matrix
-end
-
-# Int16 version of findall
-function findall_int16(f::Function, A)
-  T = Int16
-  gen = (first(p) for p in pairs(A) if f(last(p)))
-  isconcretetype(T) ? collect(T, gen) : collect(gen)
-end
-
-# Check if network is open or closed
-function check_open_closed(S::Matrix{<:Int64})
-  col_source = findall(==(1), vec(sum(S, dims=1)))
-  col_sink = findall(==(-1), vec(sum(S, dims=1)))
-  if isempty(col_source) && isempty(col_sink)
-    return "closed"
-  else
-    col_source = findall(==(1), vec(sum(S, dims=1)))
-    col_sink = findall(==(-1), vec(sum(S, dims=1)))
-    bool = all([!isempty(col_source), !isempty(col_sink)])
-    @assert(#
-      bool,
-      "An open network must contain at least one source and sink reaction."
-    )
-    return "open"
-  end
-end
-
-# Construct cycle-history Markov chain
-function trie_matrix(T::Matrix{<:Real}, I::Int64=1)
-  # Construct trie to get number of nodes
-  t = trie(T, I)
-
-  # Initialize new transition probability matrix
-  A = zeros(length(t), length(t))
-
-  # Traverse tree and populate new transition probability matrix with trie nodes
-  function traverse_trie(#
-    prefix::Vector{Int16},
-    t::Dict{#
-      Vector{Int16},
-      NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
-    },
-    T::Matrix{<:Real},
-    A::Matrix{Float64}
-  )
-    i = prefix[end] # old state
-    ii = parse(Int64, t[prefix].id[2:end]) # new state
-
-    # Fill matrix with non-children (upstream) transitions
-    childs = t[prefix].children
-    parents = findall(>(0), T[i,:])
-    parents = parents[parents .∉ Ref(childs)]
-
-    for j in parents
-      r = T[i,j]
-      l = prefix[1:findfirst(x -> x == j, prefix)]
-      jj = parse(Int64, t[l].id[2:end])
-      A[ii,jj] = r
-    end
-
-    # Fill matrix with children transitions
-    for j in childs
-      r = T[i,j]
-      jj = parse(Int64, t[[prefix; j]].id[2:end])
-      A[ii,jj] = r
-      traverse_trie([prefix; j], t, T, A)
-    end
-  end
-  traverse_trie(Int16.([I]), t, T, A)
-
-  return A, t
-end
-function trie_matrix(T::SparseMatrixCSC{Float64, Int64}, I::Int64=1)
-  # Construct trie to get number of nodes
-  t = trie(T, I)
-
-  # Initialize new transition probability matrix
-  A = spzeros(length(t), length(t))
-
-  # Traverse tree and populate new transition probability matrix with trie nodes
-  function traverse_trie(#
-    prefix::Vector{Int16},
-    t::Dict{#
-      Vector{Int16},
-      NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
-    },
-    T::SparseMatrixCSC{Float64, Int64},
-    A::SparseMatrixCSC{Float64, Int64}
-  )
-    i = prefix[end] # old state
-    ii = parse(Int64, t[prefix].id[2:end]) # new state
-
-    # Fill matrix with non-children (upstream) transitions
-    childs = t[prefix].children
-    parents = findall(>(0), T[i,:])
-    parents = parents[parents .∉ Ref(childs)]
-
-    for j in parents
-      r = T[i,j]
-      l = prefix[1:findfirst(x -> x == j, prefix)]
-      jj = parse(Int64, t[l].id[2:end])
-      A[ii,jj] = r
-    end
-
-    # Fill matrix with children transitions
-    for j in childs
-      r = T[i,j]
-      jj = parse(Int64, t[[prefix; j]].id[2:end])
-      A[ii,jj] = r
-      traverse_trie([prefix; j], t, T, A)
-    end
-  end
-  traverse_trie(Int16.([I]), t, T, A)
-
-  return A, t
-end
-
-# Construct trie dictionary keyed by prefix with values equal to children
-function trie(#
-  T::Union{#
-    Matrix{<:Real},
-    SparseMatrixCSC{Int16, Int64},
-    SparseMatrixCSC{Float64, Int64}},
-  I::Int64=1
-)
-  # Initialize dictionary of prefix and children
-  d = Dict{#
-    Vector{Int16},
-    Vector{Int16}
-  }()
-  function traverse_trie(#
-    prefix::Vector{Int16},
-    T::Union{Matrix{<:Real}, SparseMatrixCSC{Int16, Int64}, SparseMatrixCSC{Float64, Int64}},
-    d::Dict{#
-      Vector{Int16}, Vector{Int16}
+    i::Tuple{Int64,Int64,Symbol}
+    e::Vector{#
+        NamedTuple{#
+            (:EFM,:Closures),
+            Tuple{Vector{Int64},Vector{Tuple{Int64,Int64}}}
+        }
     }
-  )
-    downstream = filter!(#
-      x -> x ∉ prefix,
-      findall_int16(>(0), @view T[prefix[end],:])
-    )
-    d[prefix] = downstream
-    for p in downstream
-      traverse_trie([prefix; p], T, d)
-    end
-  end
-
-  # Construct dictionary of prefix and children and add unique IDs
-  traverse_trie(Int16.([I]), T, d)
-  v1 = ["X" * string(i) for i in 1:length(keys(d))]
-  v2 = collect(values(d))
-
-  # Ensure root node/prefix is variable "X1"
-  root_idx = findfirst([collect(keys(d))[i][end] == I for i in 1:length(d)])
-  switch_idx = findfirst(v1 .== "X1")
-  v1[switch_idx] = v1[root_idx]
-  v1[root_idx] = "X1"
-
-  vs = [(id=v1[i], children=v2[i]) for i in 1:length(v1)]
-
-  return Dict(zip(keys(d), vs))
+    p::Union{Nothing,Vector{Float64}}
+    w::Union{Nothing,Vector{Float64}}
+    dmc::Dict{Int64,Tuple{Int16,Int16}}
+    dchmc::Dict{#
+        Vector{Int16},
+        NamedTuple{(:id,:children),Tuple{Int64,Vector{Int16}}}
+    }
+    T::SparseMatrixCSC{Float64,Int64}
+    R::Vector{NamedTuple{(:i,:j,:k),Tuple{Int64,Int64,Int16}}}
 end
 
-# Enumerate EFMs via counting simple cycles
-function enumerate_efms(#
-  T′::Matrix{Float64},
-  d::Dict{#
-    Vector{Int16},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
-  }
-)
-  # Prefixes with cycle-history Markov chain states
-  prefixes = collect(keys(d))
-  prefixes_transformed = Vector{Vector{Int64}}(undef, length(prefixes))
-  for i in 1:length(prefixes)
-    temp = Vector{Int64}()
-    for j in 1:length(prefixes[i])
-      push!(#
-        temp,
-        parse(Int64, d[prefixes[i][1:j]].id[2:end])
-      )
-    end
-    prefixes_transformed[i] = temp
-  end
-
-  # For each CHMC prefix, check if the last state transitions back to a CHMC
-  # state already contained in the prefix. (Transitioning "up" the prefix tree)
-  # These simple cycles represent the EFMs
-  simple_cycles_transformed = Vector{Vector{Int64}}()
-  for i in 1:length(prefixes)
-    upstream = findall(>(0), @view T′[prefixes_transformed[i][end],:])
-    for j in 1:length(upstream)
-      idx = findfirst(prefixes_transformed[i] .== upstream[j])
-      if ~isnothing(idx)
-        cycle = [prefixes_transformed[i][end]; prefixes_transformed[i][idx:end]]
-        push!(simple_cycles_transformed, cycle)
-      end
-    end
-  end
-
-  # Convert simple cycle history states back to regular states
-  e = Dict(parse(Int64, d[k].id[2:end]) => k[end] for k in keys(d))
-  simple_cycles_original = Vector{Vector{Int64}}()
-  for i in 1:length(simple_cycles_transformed)
-    temp = Vector{Int64}()
-    for j in 1:length(simple_cycles_transformed[i])
-      push!(#
-        temp,
-        e[simple_cycles_transformed[i][j]]
-      )
-    end
-    push!(simple_cycles_original, temp)
-  end
-
-  # Aggregate CHMC simple cycles over each EFM
-  res = NamedTuple{#
-    (:EFM, :TransformedCycles),
-    Tuple{Vector{Int64}, Vector{Vector{Int64}}}
-  }[]
-  simple_cycles_original_2 = [i[2:end] for i in simple_cycles_original]
-  while !isempty(simple_cycles_original)
-    # Find all simple cycles corresponding to the same EFM
-    tmp = simple_cycles_original_2[1]
-    tmp = [tmp[[i:length(tmp); collect(1:(i-1))]] for i in 1:length(tmp)]
-    ids = vcat(#
-      [findall(simple_cycles_original_2 .== Ref(tmp[i])) for i in 1:length(tmp)]
-    ...)
-    push!(#
-      res,
-      (#
-        EFM=simple_cycles_original[1],
-        TransformedCycles=simple_cycles_transformed[ids]
-      )
-    )
-    splice!(simple_cycles_original, sort(ids))
-    splice!(simple_cycles_original_2, sort(ids))
-    splice!(simple_cycles_transformed, sort(ids))
-  end
-
-  return res
-end
-function enumerate_efms(#
-  T′::SparseMatrixCSC,
-  d::Dict{#
-    Vector{Int16},
-    NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
-  }
-)
-  # Prefixes with cycle-history Markov chain states
-  prefixes = collect(keys(d))
-  prefixes_transformed = Vector{Vector{Int64}}(undef, length(prefixes))
-  for i in 1:length(prefixes)
-    temp = Vector{Int64}()
-    for j in 1:length(prefixes[i])
-      push!(#
-        temp,
-        parse(Int64, d[prefixes[i][1:j]].id[2:end])
-      )
-    end
-    prefixes_transformed[i] = temp
-  end
-
-  # For each CHMC prefix, check if the last state transitions back to a CHMC
-  # state already contained in the prefix. (Transitioning "up" the prefix tree)
-  # These simple cycles represent the EFMs
-  simple_cycles_transformed = Vector{Vector{Int64}}()
-  for i in 1:length(prefixes)
-    upstream = findall(>(0), @view T′[prefixes_transformed[i][end],:])
-    for j in 1:length(upstream)
-      idx = findfirst(prefixes_transformed[i] .== upstream[j])
-      if ~isnothing(idx)
-        cycle = [prefixes_transformed[i][end]; prefixes_transformed[i][idx:end]]
-        push!(simple_cycles_transformed, cycle)
-      end
-    end
-  end
-
-  # Convert simple cycle history states back to regular states
-  e = Dict(parse(Int64, d[k].id[2:end]) => k[end] for k in keys(d))
-  simple_cycles_original = Vector{Vector{Int64}}()
-  for i in 1:length(simple_cycles_transformed)
-    temp = Vector{Int64}()
-    for j in 1:length(simple_cycles_transformed[i])
-      push!(#
-        temp,
-        e[simple_cycles_transformed[i][j]]
-      )
-    end
-    push!(simple_cycles_original, temp)
-  end
-
-  # Aggregate CHMC simple cycles over each EFM
-  res = NamedTuple{#
-    (:EFM, :TransformedCycles),
-    Tuple{Vector{Int64}, Vector{Vector{Int64}}}
-  }[]
-  simple_cycles_original_2 = [i[2:end] for i in simple_cycles_original]
-  while !isempty(simple_cycles_original)
-      @info("Remaining cycles: $(length(simple_cycles_original))")
-    # Find all simple cycles corresponding to the same EFM
-    tmp = simple_cycles_original_2[1]
-    tmp = [tmp[[i:length(tmp); collect(1:(i-1))]] for i in 1:length(tmp)]
-    ids = vcat(#
-      [findall(simple_cycles_original_2 .== Ref(tmp[i])) for i in 1:length(tmp)]
-    ...)
-    push!(#
-      res,
-      (#
-        EFM=simple_cycles_original[1],
-        TransformedCycles=simple_cycles_transformed[ids]
-      )
-    )
-    splice!(simple_cycles_original, sort(ids))
-    splice!(simple_cycles_original_2, sort(ids))
-    splice!(simple_cycles_transformed, sort(ids))
-  end
-
-  return res
-end
-
-# Import standard/atomic CHMC results
 """
-    import_chmc(fname::String)
+    findall_int16(f::Function, A)
 
-Import standard/atomic CHMC results from text file `fname`.
-
-`fname` is the filename containing the CHMC results.
+Int16 version of base Julia `findall` returning matching indices as Int16.
 """
-function import_chmc(fname::String)
-  # Load text file contents
-  f = open(fname)
-  lines = readlines(f)
-
-  # Headers
-  idx = findall(!isnothing, match.(r"## ", lines))
-
-  # Extract data within each header and return CHMC results structure
-  if length(idx) == 3 # standard CHMC
-    efms =  eval.(Meta.parse.(lines[(idx[1]+1):(idx[2]-2)]))
-    probs = parse.(Float64, lines[(idx[2]+1):(idx[3]-2)])
-    weights = parse.(Float64, lines[(idx[3]+1):(length(lines)-1)])
-
-    return CHMCStandardSummary(efms, probs, weights)
-  elseif length(idx) == 8 # atomic CHMC
-    init = eval(Meta.parse(lines[idx[1]+1]))
-    aefms =  eval.(Meta.parse.(lines[(idx[2]+1):(idx[3]-2)]))
-    probs = parse.(Float64, lines[(idx[3]+1):(idx[4]-2)])
-    weights = parse.(Float64, lines[(idx[4]+1):(idx[5]-2)])
-    d = split.(lines[(idx[5]+1):(idx[6]-2)], "\t")
-    x = parse.(Int64, first.(d))
-    y = eval.(Meta.parse.(last.(d)))
-    dmc = Dict(zip(x, tuple.(Int16.(first.(y)), Int16.(last.(y)))))
-    T = eval(Meta.parse(lines[idx[6]+1]))
-    d = split.(lines[(idx[7]+1):(idx[8]-2)], "\t")
-    x = eval.(Meta.parse.(first.(d)))
-    y = eval.(Meta.parse.(last.(d)))
-    dchmc = Dict(zip(x, y))
-    R = eval(Meta.parse(lines[(idx[8]+1)]))
-    return (e=aefms, p=probs, w=weights, dmc=dmc, i=init, T=T, dchmc=dchmc, R=R)
-  else
-    @warn("Cannot import the specified text file.")
-  end
+function findall_int16(f::Function, A)
+    T = Int16
+    gen = (first(p) for p in pairs(A) if f(last(p)))
+    isconcretetype(T) ? collect(T, gen) : collect(gen)
 end
 
-function solve_efm_probabilities(#
-  T::Matrix{<:Real},
-  T′::Matrix{<:Real},
-  ϕ::Vector{NamedTuple{#
-    (:EFM, :TransformedCycles),
-    Tuple{Vector{Int64}, Vector{Vector{Int64}}}
-  }},
-  solver::Symbol
-)
-  π = Vector{Float64}(undef, size(T,1))
-  if solver == :Direct
-    π = [1; (LinearAlgebra.I - T′'[2:end,2:end]) \ Vector(T′'[2:end,1])]
-    π = π / sum(π)
-  elseif solver == :IterativeSolver_gmres
-      x = gmres((LinearAlgebra.I - T′'[2:end,2:end]), Vector(T'[2:end,1]); log=true)
-      @assert(string(x[2])[1:3] != "Not", "Failed to converge on eigenvector.")
-      π = [1; x[1]]
-      π = π ./ sum(π)
-  elseif solver == :Arnoldi
-  bool = true
-    while bool
-      decomp, history = partialschur(T′', nev=1, restarts=10000, which=LR())
-      if history.converged == true
-        if all(decomp.Q .>= 0)
-          pii = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
-          π = pii
-          bool = false
-        end
-      end
-    end
-  end
+"""
+    check_open_closed(S::Matrix{<:Integer})
 
-  # Compute steady state edge probabilities and aggregate for each EFM
-  p = Vector{Float64}(undef, length(ϕ))
-  for i in 1:length(ϕ)
-    for j in ϕ[i].TransformedCycles
-      p[i] += π[j[1]] * T′[j[1], j[2]]
+Returns "closed" or "open" if input stoichiometry matrix is closed or open loop.
+"""
+function check_open_closed(S::Matrix{<:Integer})
+    j_src = findall(==(+1), vec(sum(S, dims = 1)))
+    j_snk = findall(==(-1), vec(sum(S, dims = 1)))
+    if isempty(j_src) && isempty(j_snk)
+        return "closed"
+    else
+        j_sre = findall(==(+1), vec(sum(S, dims = 1)))
+        j_snk = findall(==(-1), vec(sum(S, dims = 1)))
+        bool = all([!isempty(j_src), !isempty(j_snk)])
+        @assert(#
+            bool,
+            join([#
+                "The network must be open-loop and contain at least one ",
+                "source and sink reaction. An open network must contain at ",
+                "least one source and sink reaction."
+            ])
+        )
+        return "open"
     end
-  end
-  return p
 end
-function solve_efm_probabilities(#
-  T::SparseMatrixCSC,
-  T′::SparseMatrixCSC,
-  ϕ::Vector{NamedTuple{#
-    (:EFM, :TransformedCycles),
-    Tuple{Vector{Int64}, Vector{Vector{Int64}}}
-  }},
-  solver::Symbol
-)
-  π = Vector{Float64}(undef, size(T,1))
-  if solver == :Direct
-    π = [1; (LinearAlgebra.I - T′'[2:end,2:end]) \ Vector(T′'[2:end,1])]
-    π = π / sum(π)
-  elseif solver == :IterativeSolver_gmres
-      x = gmres((LinearAlgebra.I - T′'[2:end,2:end]), Vector(T'[2:end,1]); log=true)
-      @assert(string(x[2])[1:3] != "Not", "Failed to converge on eigenvector.")
-      π = [1; x[1]]
-      π = π ./ sum(π)
-  elseif solver == :Arnoldi
-  bool = true
-    while bool
-      decomp, history = partialschur(T′', nev=1, restarts=10000, which=LR())
-      if history.converged == true
-        if all(decomp.Q .>= 0)
-          pii = vec((T′' * decomp.Q) / sum(T′' * decomp.Q))
-          π = pii
-          bool = false
-        end
-      end
-    end
-  end
 
-  # Compute steady state edge probabilities and aggregate for each EFM
-  p = Vector{Float64}(undef, length(ϕ))
-  for i in 1:length(ϕ)
-    for j in ϕ[i].TransformedCycles
-      p[i] += π[j[1]] * T′[j[1], j[2]]
+"""
+    isrotation(efm::Vector{Int64}, scs::Vector{Vector{Int64}})
+
+Identify all simple cycles in `scs` that are identical to or rotation of the
+simple cycle `efm`. This function assumes the simple cycles in `scs` and `efm`
+are broken such that the efm[1] != efm[end].
+"""
+function isrotation(efm::Vector{Int64}, scs::Vector{Vector{Int64}})
+    idx = Vector{Int64}()
+    ee = [efm; efm]
+    for k in eachindex(scs)
+        l = k
+        if length(efm) == length(scs[k])
+            i = findfirst(==(scs[k][1]), efm)
+            if !isnothing(i)
+                for j in 0:(length(scs[k]) - 1)
+                    if ee[i+j] != scs[k][j + 1]
+                        l = 0
+                        break
+                    end
+                end
+                if l != 0
+                    push!(idx, k)
+                end
+            end
+        end
     end
-  end
-  return p
+
+    return idx
+end
+
+function prefixes_mc_to_chmc(#
+    d::Dict{Vector{Int16},NamedTuple{(:id,:children),Tuple{Int64,Vector{Int16}}}}
+)
+    pfx_chmc = Vector{Vector{Int64}}(undef, length(d))
+    c = 0
+    for i in eachindex(d)
+        temp = Vector{Int64}()
+        for j in eachindex(i)
+            push!(temp, d[i[1:j]].id)
+        end
+        pfx_chmc[c+=1] = temp
+    end
+    return pfx_chmc
+end
+
+function parallel_prefixes_chmc_to_simple_cycles(#
+    pfx_chmc::Vector{Vector{Int64}},
+    T′::Union{Matrix{Float64}, SparseMatrixCSC};
+    verbose::Bool = false
+)
+    if verbose == true
+        p = Progress(length(pfx_chmc); dt = 1.0, desc = "")
+    end
+
+    sc_chmc = Vector{Vector{Vector{Int64}}}(undef, length(pfx_chmc))
+    Threads.@threads for i in eachindex(pfx_chmc)
+        upstream = findall(>(0), @view T′[pfx_chmc[i][end], :])
+        tmp = Vector{Vector{Int64}}()
+        for j in eachindex(upstream)
+            idx = findfirst(pfx_chmc[i] .== upstream[j])
+            if ~isnothing(idx)
+                push!(tmp, [pfx_chmc[i][end]; pfx_chmc[i][idx:end]])
+            end
+        end
+        sc_chmc[i] = tmp
+        if verbose == true
+            next!(p)
+        end
+    end
+    if verbose == true
+        finish!(p)
+    end
+
+    return reduce(vcat, sc_chmc)
+end
+
+function parallel_simple_cycles_chmc_to_mc(#
+    sc_chmc::Vector{Vector{Int64}},
+    d::Dict{Vector{Int16},NamedTuple{(:id,:children),Tuple{Int64,Vector{Int16}}}};
+    verbose::Bool = false
+)
+    if verbose == true
+        p = Progress(length(sc_chmc); dt = 1.0, desc = "")
+    end
+
+    e = Dict(d[k].id => k[end] for k in keys(d))
+    sc_mc = Vector{Vector{Int64}}(undef, length(sc_chmc))
+    Threads.@threads for i in eachindex(sc_chmc)
+        temp = Vector{Int64}()
+        for j in eachindex(sc_chmc[i])
+            push!(temp, e[sc_chmc[i][j]])
+        end
+        sc_mc[i] = temp
+        if verbose == true
+            next!(p)
+        end
+    end
+    if verbose == true
+        finish!(p)
+    end
+
+    return sc_mc
+end
+
+function parallel_simple_cycles_to_efms(#
+    sc_mc::Vector{Vector{Int64}},
+    sc_chmc::Vector{Vector{Int64}};
+    verbose::Bool = true
+)
+    if verbose == true
+        p = Progress(Threads.nthreads(); dt = 1.0, desc = "")
+    end
+
+    # Set maximum number of chunks
+    len = Threads.nthreads()
+    if length(sc_mc) < Threads.nthreads()
+        len = length(sc_mc)
+    end
+
+    x = Vector{Vector{Vector{Int64}}}(undef, len)
+    y = Vector{Vector{Vector{Tuple{Int64,Int64}}}}(undef, len)
+    sc_o2 = [i[2:end] for i in sc_mc]
+    Threads.@threads for i in 1:len
+        local id = getchunk(sc_o2, i, len)
+        x[i], y[i] = group_simple_cycles(sc_o2[id], sc_mc[id], sc_chmc[id])
+        if verbose == true
+            next!(p)
+        end
+    end
+    if verbose == true
+        finish!(p)
+    end
+    x = reduce(vcat, x)
+    y = reduce(vcat, y)
+
+    res = NamedTuple{#
+        (:EFM,:Closures),Tuple{Vector{Int64},Vector{Tuple{Int64,Int64}}}
+    }[]
+    x2 = [i[2:end] for i in x]
+    while !isempty(x)
+        ids = sort(isrotation(x2[1], x2))
+        push!(res, (EFM = x[1], Closures = reduce(vcat, y[ids])))
+        splice!(x2, ids)
+        splice!(x, ids)
+        splice!(y, ids)
+    end
+
+    return res
+end
+
+function group_simple_cycles(sc_o2, sc_mc, sc_chmc)
+    g(x) = Tuple(x[1:2])
+    x = Vector{Vector{Int64}}()
+    y = Vector{Vector{Tuple{Int64,Int64}}}()
+    while !isempty(sc_mc)
+        ids = sort(isrotation(sc_o2[1], sc_o2))
+        push!(x, sc_mc[1])
+        push!(y, g.(sc_chmc[ids]))
+        splice!(sc_mc, ids)
+        splice!(sc_o2, ids)
+        splice!(sc_chmc, ids)
+    end
+
+    return x, y
+end
+
+"""
+    trie(#
+        T::Union{#
+            Matrix{<:Real},
+            SparseMatrixCSC{Int16, Int64},
+            SparseMatrixCSC{Float64, Int64}
+        },
+        I::Int64 = 1
+    )
+
+Constructs the CHMC dictionary from MC matrix and initial starting state.
+
+`T` is the transition probability matrix.
+`I` is the initial state to root the CHMC.
+"""
+function trie(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    I::Int16 = Int16(1)
+)
+    # First tumble down the tree for key/value pairs
+    p, queue = trie_first_pass(T, I)
+
+    # Traverse remaining prefixes in the queue
+    p2 = Vector{Vector{Pair{Vector{Int16}, Vector{Int16}}}}(undef, length(queue))
+    Threads.@threads for i in eachindex(queue)
+        p2[i] = trie_standard(T, queue[i])
+    end
+
+    # Concatenate pairs and reshape to dictionary with CHMC state indices
+    if !isempty(p2)
+        p = [p; reduce(vcat, p2)]
+    end
+
+    return Dict(zip(first.(p), NamedTuple{(:id, :children)}.(tuple.(eachindex(p), last.(p)))))
+end
+
+function trie_first_pass(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    I::Int16 = Int16(1)
+)
+    p = Vector{Pair{Vector{Int16}, Vector{Int16}}}()
+    pfxs = Vector{Vector{Int16}}()
+
+    function traverse_trie(pfx, p, pfxs)
+        ds = filter!(x -> x ∉ pfx, findall_int16(>(0), @view T[pfx[end], :]))
+        push!(p, pfx => ds)
+        if !isempty(ds)
+            for d in ds[2:end]
+                push!(pfxs, [pfx; d])
+            end
+            traverse_trie([pfx; ds[1]], p, pfxs)
+        end
+    end
+
+    # Construct dictionary of prefixes
+    traverse_trie(Int16[I], p, pfxs)
+
+    return p, pfxs
+end
+
+function trie_standard(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    I::Vector{Int16}
+)
+    p = Vector{Pair{Vector{Int16}, Vector{Int16}}}()
+
+    function traverse_trie(#
+        pfx::Vector{Int16},
+        T::Union{#
+            Matrix{<:Real},
+            SparseMatrixCSC{Int16, Int64},
+            SparseMatrixCSC{Float64, Int64}
+        },
+        p::Vector{Pair{Vector{Int16}, Vector{Int16}}}
+    )
+        ds = filter!(x -> x ∉ pfx, findall_int16(>(0), @view T[pfx[end], :]))
+        push!(p, pfx => ds)
+        for d in ds
+            traverse_trie([pfx; d], T, p)
+        end
+    end
+
+    # Construct dictionary of prefixes
+    traverse_trie(I, T, p)
+
+    return p
+end
+
+"""
+    trie_matrix(#
+        T::Union{#
+            Matrix{<:Real},
+            SparseMatrixCSC{Int16, Int64},
+            SparseMatrixCSC{Float64, Int64}
+        },
+        I::Int64 = 1,
+        verbose::Bool=false
+    )
+
+Constructs the CHMC matrix from CHMC dictionary and returns both.
+
+`T` is the transition probability matrix.
+`I` is the initial state to root the CHMC.
+"""
+function trie_matrix(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    I::Int64=1;
+    verbose::Bool=false
+)
+    # Construct trie to get number of nodes
+    if verbose == true
+        @info("       Constructing CHMC trie.")
+    end
+    d = trie(T, Int16(I))
+
+    # First tumble down the tree to fill queue of prefixes
+    if verbose == true
+        @info("       Converting CHMC trie to CHMC probability matrix.")
+    end
+    rs, cs, vs, queue = trie_matrix_first_pass(T, d, I)
+
+    # Traverse remaining prefixes in the queue
+    rs2 = Vector{Vector{Int64}}(undef, length(queue))
+    cs2 = Vector{Vector{Int64}}(undef, length(queue))
+    vs2 = Vector{Vector{Float64}}(undef, length(queue))
+    Threads.@threads for i in eachindex(queue)
+        rs2[i], cs2[i], vs2[i] = trie_matrix_standard(T, d, queue[i])
+    end
+
+    # Initialize and return sparse or dense matrix
+    if !isempty(rs2) && !isempty(cs2) && !isempty(vs2)
+        rs = [rs; reduce(vcat, rs2)]
+        cs = [cs; reduce(vcat, cs2)]
+        vs = [vs; reduce(vcat, vs2)]
+    end
+    A = sparse(rs, cs, vs, length(d), length(d))
+    if !issparse(T)
+        return Matrix(A), d
+    end
+
+    return A, d
+end
+
+function trie_matrix_first_pass(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    d::Dict{#
+        Vector{Int16},
+        NamedTuple{(:id, :children), Tuple{Int64, Vector{Int16}}}
+    },
+    I::Int64 = 1
+)
+    # Construct (sparse) CHMC transition matrix with COO format
+    rs = Vector{Int64}()
+    cs = Vector{Int64}()
+    vs = Vector{Float64}()
+
+    # Queue
+    pfxs = Vector{Vector{Int16}}()
+
+    function traverse_trie(#
+        pfx::Vector{Int16},
+        d::Dict{#
+            Vector{Int16},
+            NamedTuple{(:id, :children), Tuple{Int64, Vector{Int16}}}
+        },
+        T::Union{Matrix{<:Real}, SparseMatrixCSC{Float64, Int64}},
+        rs::Vector{Int64},
+        cs::Vector{Int64},
+        vs::Vector{Float64},
+        pfxs::Vector{Vector{Int16}}
+    )
+        # Fill matrix with non-children (upstream) transitions
+        parents = findall(>(0), @views T[pfx[end], :])
+        filter!(x -> x∉ d[pfx].children, parents)
+        for j in parents
+            push!(rs, d[pfx].id)
+            push!(cs, d[pfx[1:findfirst(x -> x == j, pfx)]].id)
+            push!(vs, T[pfx[end], j])
+        end
+
+        # Fill matrix with children transitions
+        for i in eachindex(d[pfx].children)
+            push!(rs, d[pfx].id)
+            push!(cs, d[[pfx; d[pfx].children[i]]].id)
+            push!(vs, T[pfx[end], d[pfx].children[i]])
+            if i > 1
+                push!(pfxs, [pfx; d[pfx].children[i]])
+            end
+        end
+        if !isempty(d[pfx].children)
+            traverse_trie([pfx; d[pfx].children[1]], d, T, rs, cs, vs, pfxs)
+        end
+    end
+    traverse_trie(Int16.([I]), d, T, rs, cs, vs, pfxs)
+
+    return rs, cs, vs, pfxs
+end
+
+function trie_matrix_standard(#
+    T::Union{#
+        Matrix{<:Real},
+        SparseMatrixCSC{Int16, Int64},
+        SparseMatrixCSC{Float64, Int64}
+    },
+    d::Dict{#
+        Vector{Int16},
+        NamedTuple{(:id, :children), Tuple{Int64, Vector{Int16}}}
+    },
+    pfx::Vector{Int16}
+)
+    # Construct (sparse) CHMC transition matrix with COO format
+    rs = Vector{Int64}()
+    cs = Vector{Int64}()
+    vs = Vector{Float64}()
+
+    function traverse_trie(#
+        pfx::Vector{Int16},
+        d::Dict{#
+            Vector{Int16},
+            NamedTuple{(:id, :children), Tuple{Int64, Vector{Int16}}}
+        },
+        T::Union{Matrix{<:Real}, SparseMatrixCSC{Float64, Int64}},
+        rs::Vector{Int64},
+        cs::Vector{Int64},
+        vs::Vector{Float64}
+    )
+        # Fill matrix with non-children (upstream) transitions
+        parents = findall(>(0), @views T[pfx[end], :])
+        filter!(x -> x∉ d[pfx].children, parents)
+        for j in parents
+            push!(rs, d[pfx].id)
+            push!(cs, d[pfx[1:findfirst(x -> x == j, pfx)]].id)
+            push!(vs, T[pfx[end], j])
+        end
+
+        # Fill matrix with children transitions
+        for j in d[pfx].children
+            push!(rs, d[pfx].id)
+            push!(cs, d[[pfx; j]].id)
+            push!(vs, T[pfx[end], j])
+            traverse_trie([pfx; j], d, T, rs, cs, vs)
+        end
+    end
+    traverse_trie(pfx, d, T, rs, cs, vs)
+
+    return rs, cs, vs
+end
+
+"""
+    enumerate_efms(#
+        T′::Union{Matrix{Float64}, SparseMatrixCSC},
+        d::Dict{#
+            Vector{Int16},
+            NamedTuple{(:id, :children), Tuple{String, Vector{Int16}}}
+        };
+        verbose::Bool = false
+    )
+
+Enumerates the EFMs from the CHMC.
+
+`T′` is the CHMC transition probability matrix.
+`d` is the CHMC dictionary.
+"""
+function enumerate_efms(#
+    T′::Union{Matrix{Float64}, SparseMatrixCSC},
+    d::Dict{#
+        Vector{Int16},
+        NamedTuple{(:id, :children), Tuple{Int64, Vector{Int16}}}
+    };
+    verbose::Bool = false
+)
+    # Prefixes with CHMC states
+    if verbose == true
+        @info("       Converting MC trie prefixes to CHMC prefixes.")
+    end
+    pfx_chmc = prefixes_mc_to_chmc(d)
+
+    # For each CHMC prefix, check if the last state transitions back to a CHMC
+    # state already contained in the prefix. (Transitioning "up" the prefix tree)
+    # These simple cycles represent the EFMs
+    if verbose == true
+        @info("       Extracting simple cycles from all CHMC prefixes.")
+    end
+    sc_chmc = parallel_prefixes_chmc_to_simple_cycles(pfx_chmc, T′; verbose)
+
+    # Convert simple cycle history states back to regular states
+    if verbose == true
+        @info("       Converting CHMC simple cycles to MC simple cycles.")
+    end
+    sc_mc = parallel_simple_cycles_chmc_to_mc(sc_chmc, d; verbose)
+
+    # Aggregate CHMC simple cycles for each EFM
+    if verbose == true
+        @info("       Aggregating simple cycles across EFMs.")
+    end
+    return parallel_simple_cycles_to_efms(sc_mc, sc_chmc; verbose)
+end
+
+"""
+    solve_efm_probabilities(#
+        T′::Union{Matrix{<:Real}, SparseMatrixCSC},
+        ϕ::Vector{#
+            NamedTuple{#
+                (:EFM, :Closures),
+                Tuple{Vector{Int64},Vector{Tuple{Int64,Int64}}}
+            }
+        },
+        solver::Symbol
+    )
+
+Solves the EFM probabilities from CHMC transition probability matrix `T′` and
+array of EFMs and their simple cycles `ϕ`.
+
+`solver` is the type used for eigenvector calculations. Default is `nothing`
+and `LinearSolve` will pick the best solver. Consult `LinearSolve.jl` for 
+specifying other solvers.
+"""
+function solve_efm_probabilities(#
+    T′::Union{Matrix{<:Real}, SparseMatrixCSC},
+    ϕ::Vector{#
+        NamedTuple{#
+            (:EFM, :Closures),
+            Tuple{Vector{Int64},Vector{Tuple{Int64,Int64}}}
+        }
+    },
+    solver = nothing
+)
+    π = linearsolve_eigenvector(T′, solver)
+    @assert(all(.!isnan.(π)), "Eigenvector cannot contain NaNs.")
+    @assert(all(.!isnan.(π)), "All eigenvector coefficients must be positive.")
+    while true
+        p = solve_probabilities(T′, ϕ, π)
+        if all(.!isnan.(p)) && all(p .>= 0)
+            return p
+        end
+    end
+    #@assert(all(.!isnan.(p)), "Steady state CHMC probabilities cannot be NaN.")
+end
+
+function linearsolve_eigenvector(T::Union{Matrix{<:Real}, SparseMatrixCSC}, solver)
+    A = (LinearAlgebra.I - T'[2:end, 2:end])
+    b = Vector(T'[2:end, 1])
+    lin_prob = LinearProblem(A, b)
+    while true
+        sol = solve(lin_prob, solver)
+        if !any(isnan.(sol.u)) && all(sol.u .>= 0)
+            π = [1; sol.u]
+            return π / sum(π)
+        end
+    end
+end
+
+function solve_probabilities(#
+    T′::Union{Matrix{<:Real}, SparseMatrixCSC},
+    ϕ::Vector{#
+        NamedTuple{#
+            (:EFM, :Closures),
+            Tuple{Vector{Int64},Vector{Tuple{Int64,Int64}}}
+        }
+    },
+    π::Vector{Float64}
+)
+    p = Vector{Float64}(undef, length(ϕ))
+    for i in eachindex(ϕ)
+        for j in ϕ[i].Closures
+            p[i] += π[j[1]] * T′[first(j), last(j)]
+        end
+    end
+
+    return p
 end
 

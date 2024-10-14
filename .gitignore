@@ -1,11 +1,3 @@
-Manifest.toml
-src/chmc-algorithm/atomic/chmc-atomic.jl
-src/chmc-algorithm/atomic/error-checking.jl
-src/chmc-algorithm/atomic/helpers.jl
-src/chmc-algorithm/atomic/io.jl
-src/chmc-algorithm/atomic/submodule.jl
-src/chmc-visualization/atomic/atomic.jl
-src/chmc-visualization/atomic/helpers.jl
 src/higher-order-catalyst.jl
 src/plot-catalyst-network.jl
 
