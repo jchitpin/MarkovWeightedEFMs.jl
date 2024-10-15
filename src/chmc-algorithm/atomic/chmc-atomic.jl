@@ -553,11 +553,11 @@ import MarkovWeightedEFMs.CHMC.Standard.steady_state_efm_distribution
         S::Matrix{<:Integer},
         v::Vector{<:Real},
         ms::Vector{String},
-        I::Tuple{Int64,Int64,Symbol};
+        I::Tuple{Int64,Int64,Symbol},
         D::Dict{#
           NTuple{4,Int64},
           Tuple{Int64,Int64}
-        } = Dict{NTuple{4,Int64}, Tuple{Int64,Int64}}(),
+        } = Dict{NTuple{4,Int64}, Tuple{Int64,Int64}}();
         solver = nothing,
         verbose::Bool = true
     )
@@ -578,7 +578,6 @@ atom index type. It is the initial starting state for rooting the cycle-history
 Markov chain.
 
 `D` is the precomputed dictionary from [`precompute_atom_tracing_dictionary`](@ref).
-Specifying `D` greatly speeds up the atomic CHMC construction.
 
 `solver` is the type used for eigenvector calculations. Default is `nothing`
 and `LinearSolve` will pick the best solver. Consult `LinearSolve.jl` for 
@@ -659,11 +658,11 @@ end
     enumerate_atomic_efms(#
         S::Matrix{<:Integer},
         ms::Vector{String},
-        I::Tuple{Int64,Int64,Symbol};
+        I::Tuple{Int64,Int64,Symbol},
         D::Dict{#
           NTuple{4,Int64},
           Tuple{Int64,Int64}
-        } = Dict{NTuple{4,Int64}, Tuple{Int64,Int64}}(),
+        } = Dict{NTuple{4,Int64}, Tuple{Int64,Int64}}();
         verbose::Bool = true
     )
 
@@ -681,7 +680,6 @@ atom index type. It is the initial starting state for rooting the cycle-history
 Markov chain.
 
 `D` is the precomputed dictionary from [`precompute_atom_tracing_dictionary`](@ref).
-Specifying `D` greatly speeds up the atomic CHMC construction.
 """
 function enumerate_atomic_efms(#
     S::Matrix{Int16},
