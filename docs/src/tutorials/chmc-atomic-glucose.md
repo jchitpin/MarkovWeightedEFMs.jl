@@ -103,7 +103,8 @@ S, v, mets, rxns, smiles, logs = correct_atomic_chmc_input_smiles(S, v, mets, rx
 ```
 
 At this point, the SMILES strings (matching the updated `mets` if there were
-errors in the initial inputs) should be canonicalized.
+errors in the initial inputs) should be canonicalized. `S` is also converted
+to a `Matrix{Int16}` which is a requirement for subsequent functions.
 
 ```julia
 smiles = canonicalize_smiles(smiles)
@@ -124,7 +125,7 @@ rs, ms = map_reaction_strings(S, smiles, rxns, false)
 # Precompute atom tracing dictionary
 atom = :C # carbon
 atom_max = get_max_atoms(smiles, atom)
-D_C = precompute_atom_tracing_dictionary(S, ms, atom_max, atom)
+D_C = precompute_atom_tracing_dictionary(S, ms, atom_max, atom) # S must be Matrix{Int16}
 
 # Identify source metabolites
 src_mets = get_source_metabolites(S)
@@ -139,7 +140,7 @@ source metabolite in the stoichiometry matrix 6-phospho-D-gluconate.
 
 ```julia
 I = (src_mets[1], 1, atom) # initial state is 1st carbon of canonicalized glucose
-res = steady_state_efm_distribution(S, v, ms, I, D_C; verbose = false)
+res = steady_state_efm_distribution(S, v, ms, I, D_C; verbose = false) # S must be Matrix{Int16}
 ```
 
 If we only wanted to enumerate the AEFMs, we would run:
@@ -151,6 +152,33 @@ enumerate_atomic_efms(S, ms, I, D_C, verbose = false)
 Both functions produce the same output structure `res`, except that the
 AEFM flux decomposition field will be a vector of zeros.
 
+### Output
+
+The output `res` is an immutable struct with 8 fields:
+
+`res.i` is a tuple storing (i) the source metabolite index, (ii) source
+metabolite atom index (based on canonicalized SMILES string), and (iii)
+the atom type.
+
+`res.e` is an array of AEFMs with all corresponding simple cycle closures.
+
+`res.p` is an array of AEFM probabilities normalized to one.
+
+`res.w` is an array of AEFM weights normalized by the (unimolecular) reaction flux of the source metabolite.
+
+`res.dchmc` is a dictionary storing the ACHMC. The keys are the ACHMC
+states (composed of Markov chain states in `res.dmc`). The values are the
+ACHMC state and the Markov chain state children.
+
+`res.dmc` is a dictionary converting Markov chain states to
+metabolite-atom positions. The value `(0, 0)` always corresponds to the
+external environment sink node (which connects back to the source
+metabolite-atom state).
+
+`res.T` is a sparse array storing the ACHMC transition probability matrix.
+
+`res.R` is an array of tuples storing the reaction index/indices mapped to
+each ACHMC transition matrix element.
 
 ## Converting AEFM to sequence of metabolites
 
@@ -217,6 +245,4 @@ plot_mapped_reaction(ms[2], view=true)
 ```
 
 ![Mapped reaction SMILES string](../assets/ms-2.svg)
-
-
 

@@ -18,7 +18,7 @@ julia> Pkg.add("https://github.com/jchitpin/MarkovWeightedEFMs.jl.git")
 
 AEFM-specific analyses depend on the atom mapping program RXNMapper. This
 package must be installed and built with PyCall.jl after installing
-MarkovWeightedEFMs.jl. **Tested with python version 3.10**
+MarkovWeightedEFMs.jl. **Tested to work with python version 3.10 and 3.11**
 
 This can be done by creating a python virtual environment, installing
 RXNMapper, and setting the `PYTHON` environment variable to the python
