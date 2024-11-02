@@ -229,7 +229,7 @@ function parallel_simple_cycles_to_efms(#
     y = Vector{Vector{Vector{Tuple{Int64,Int64}}}}(undef, len)
     sc_o2 = [i[2:end] for i in sc_mc]
     
-    ids = collect(index_chunks(x; n=len))
+    ids = collect(index_chunks(sc_mc; n=len))
     Threads.@threads for i in 1:len
         x[i], y[i] = group_simple_cycles(sc_o2[ids[i]], sc_mc[ids[i]], sc_chmc[ids[i]])
         if verbose == true
