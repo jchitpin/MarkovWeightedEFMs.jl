@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Boilerplate code for ACHMC analysis of BiGG models · MarkovWeightedEFMs.jl</title><meta name="title" content="Boilerplate code for ACHMC analysis of BiGG models · MarkovWeightedEFMs.jl"/><meta property="og:title" content="Boilerplate code for ACHMC analysis of BiGG models · MarkovWeightedEFMs.jl"/><meta property="twitter:title" content="Boilerplate code for ACHMC analysis of BiGG models · MarkovWeightedEFMs.jl"/><meta name="description" content="Documentation for MarkovWeightedEFMs.jl."/><meta property="og:description" content="Documentation for MarkovWeightedEFMs.jl."/><meta property="twitter:description" content="Documentation for MarkovWeightedEFMs.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="MarkovWeightedEFMs.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MarkovWeightedEFMs.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><span class="tocitem">Home</span><ul><li><a class="tocitem" href="../../">MarkovWeightedEFMs.jl</a></li></ul></li><li><span class="tocitem">Installation</span><ul><li><a class="tocitem" href="../../installation/installation/">Getting started</a></li></ul></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../chmc-standard-metabolic-networks/">CHMC (metabolic networks)</a></li><li><a class="tocitem" href="../chmc-standard-ion-channels/">CHMC (ion channels)</a></li><li><a class="tocitem" href="../chmc-atomic-glucose/">ACHMC (for AEFMs)</a></li><li class="is-active"><a class="tocitem" href>Boilerplate code for ACHMC analysis of BiGG models</a><ul class="internal"><li><a class="tocitem" href="#Inputs-(from-BiGG)"><span>Inputs (from BiGG)</span></a></li><li><a class="tocitem" href="#Pre-processing-inputs-(for-AEFM-enumeration)"><span>Pre-processing inputs (for AEFM enumeration)</span></a></li><li><a class="tocitem" href="#Pre-processing-inputs-(for-AEFM-weight-assignment)"><span>Pre-processing inputs (for AEFM weight assignment)</span></a></li><li><a class="tocitem" href="#Enumerating-AEFMs-across-all-source-metabolite-carbons"><span>Enumerating AEFMs across all source metabolite carbons</span></a></li><li><a class="tocitem" href="#Computing-AEFM-weights-across-all-source-metabolite-carbons"><span>Computing AEFM weights across all source metabolite carbons</span></a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../library/chmc-standard/">CHMC</a></li><li><a class="tocitem" href="../../library/chmc-atomic/">Atomic CHMC</a></li><li><a class="tocitem" href="../../library/chmc-plots-standard/">Plotting (CHMC)</a></li><li><a class="tocitem" href="../../library/chmc-plots-atomic/">Plotting (ACHMC)</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Boilerplate code for ACHMC analysis of BiGG models</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Boilerplate code for ACHMC analysis of BiGG models</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/jchitpin/MarkovWeightedEFMs.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/jchitpin/MarkovWeightedEFMs.jl/blob/main/docs/src/tutorials/boilerplate-for-bigg-gems.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Boilerplate-code-for-ACHMC-analysis-of-BiGG-models"><a class="docs-heading-anchor" href="#Boilerplate-code-for-ACHMC-analysis-of-BiGG-models">Boilerplate code for ACHMC analysis of BiGG models</a><a id="Boilerplate-code-for-ACHMC-analysis-of-BiGG-models-1"></a><a class="docs-heading-anchor-permalink" href="#Boilerplate-code-for-ACHMC-analysis-of-BiGG-models" title="Permalink"></a></h1><p>The following code is provided to quickly construct ACHMC models of BiGG metabolic models and others stored in the SBML file format. Each code block is designed to be standalone with calculations saved to file and re-loaded in a subsequent code block. Unfortunately, BiGG does not store SMILES strings so these will need to be manually compiled by the user.</p><p>Note we recommend starting with relatively small networks (&lt;500 metabolites and reactions in the original metabolic model) for computational feasibility.</p><h2 id="Inputs-(from-BiGG)"><a class="docs-heading-anchor" href="#Inputs-(from-BiGG)">Inputs (from BiGG)</a><a id="Inputs-(from-BiGG)-1"></a><a class="docs-heading-anchor-permalink" href="#Inputs-(from-BiGG)" title="Permalink"></a></h2><p>This section shows how to extract relevant information from a BiGG metabolic model called <code>e_coli_core.xml</code></p><pre><code class="language-julia hljs"># Import file names
+im_sbml = &quot;e_coli_core.xml&quot;
+
+# Export file names
+ex_stoich                   = &quot;stoich.csv&quot;
+ex_metabolites_compartments = &quot;metabolites-compartments.csv&quot;
+ex_reactions                = &quot;reactions.csv&quot;
+ex_formulas                 = &quot;metabolite-formulas.csv&quot;
+
+# Packages
+using SBML, CSV, Tables
+
+# Load SBML model
+mdl = readSBML(im_sbml)
+metabolites, reactions, S = stoichiometry_matrix(mdl)
+
+# Dense stoichiometry matrix
+S = Array(S)
+
+# Metabolite names
+mets = [mdl.species[m].name for m in metabolites]
+mets = replace.(mets, &quot; &quot; =&gt; &quot;_&quot;)
+
+# Metabolite names concatenated with compartment
+metsc = [#
+    join([mdl.species[m].name, mdl.species[m].compartment], &quot;_&quot;)
+    for m in metabolites
+]
+metsc = replace.(metsc, &quot; &quot; =&gt; &quot;_&quot;)
+
+# Metabolite formulas
+formulas = [mdl.species[m].formula for m in metabolites]
+formulas[isnothing.(formulas)] .= &quot;&quot;
+
+# Reaction names
+rxns = [mdl.reactions[r].name for r in reactions]
+
+# Export to text file
+CSV.write(ex_stoich, Tables.table(S), header = false)
+CSV.write(ex_metabolites, Tables.table(mets), header = false)
+CSV.write(ex_metabolites_compartments, Tables.table(metsc), header = false)
+CSV.write(ex_reactions, Tables.table(rxns), header = false)
+CSV.write(ex_formulas, Tables.table(formulas), header = false)</code></pre><h2 id="Pre-processing-inputs-(for-AEFM-enumeration)"><a class="docs-heading-anchor" href="#Pre-processing-inputs-(for-AEFM-enumeration)">Pre-processing inputs (for AEFM enumeration)</a><a id="Pre-processing-inputs-(for-AEFM-enumeration)-1"></a><a class="docs-heading-anchor-permalink" href="#Pre-processing-inputs-(for-AEFM-enumeration)" title="Permalink"></a></h2><p>This section pre-processes the BiGG inputs to meet the ACHMC requirements.</p><pre><code class="language-julia hljs"># Import file names
+im_stoich = &quot;stoich.csv&quot;
+im_mets   = &quot;metabolites-compartments.csv&quot;
+im_rxns   = &quot;reactions.csv&quot;
+im_smiles = &quot;smiles-isomeric.csv&quot;
+
+# Export file names
+ex_stoich = &quot;stoichiometry-matrix-processed.csv&quot;
+ex_mets   = &quot;metabolites-processed.csv&quot;
+ex_rxns   = &quot;reactions-processed.csv&quot;
+ex_smiles = &quot;smiles-isomeric-processed.csv&quot;
+ex_reaction_smiles        = &quot;reaction-smiles-processed.csv&quot;
+ex_mapped_reaction_smiles = &quot;mapped-reaction-smiles-strings-processed.csv&quot;
+ex_dict_carbon            = &quot;dictionary-atom-tracing-carbon.csv&quot;
+
+# Packages
+using CSV, Tables, MarkovWeightedEFMs, BenchmarkTools
+
+## Load previous inputs
+# Stoichiometry matrix
+S = CSV.read(im_stoich, Tables.matrix, header = false)
+
+# Metabolites
+mets = vec(CSV.read(im_mets, Tables.matrix, header = false))
+
+# Reactions
+rxns = String.(vec(CSV.read(im_rxns, Tables.matrix, header = false)))
+
+## Pre-processing
+# (1) Identify problems with S/v inputs
+errors = find_atomic_chmc_input_errors(S)
+print(errors) # summary of errors associated with S
+
+# (2) Clean S inputs
+S2, mets2, rxns2 = correct_atomic_chmc_input_errors(errors, S, mets, rxns)
+print(find_atomic_chmc_input_errors(S2)) # confirm errors have been fixed
+
+# (3) Construct vector of smiles corresponding to the remaining metabolites in S
+# The SMILES strings for pseudometabolites with no defined chemical structure
+# are given an arbitrary SMILES of &#39;R&#39; (or character that does not represent
+# a periodic table element)
+# SMILES strings matching S2
+smiles3 = vec(CSV.read(im_smiles, Tables.matrix, header = false))
+
+# (4) Remove pseudometabolites and reactions exceeding RXNMapper character limit
+S4, mets4, rxns4, smiles4, i4 = correct_atomic_chmc_input_smiles(#
+  S2, mets2, rxns2, smiles3
+)
+i4.dropped_rows_pseudometabolites # pseudometabolite rows removed from S2
+i4.dropped_cols_pseudometabolites # pseudometabolite reactions removed from S2
+i4.dropped_cols_rxnmapper_limit # reactions in S2 removed bc of RXNMapper limit
+print(find_atomic_chmc_input_errors(S4)) # confirm no errors
+
+# (5) Construct the reaction strings and map atoms via RXNMAPPER
+smiles5 = canonicalize_smiles(smiles4) # smiles strings must be canonicalized!
+rs5, ms5 = map_reaction_strings(S4, smiles5, rxns4, false)
+
+# (6) Precompute atom tracing dictionary (for carbons)
+amax = get_max_atoms(smiles5, :C)
+D_C = precompute_atom_tracing_dictionary(S4, ms5, amax, :C)
+
+# Export to text file
+CSV.write(ex_stoich, Tables.table(S4), header = false)
+CSV.write(ex_mets, Tables.table(mets4), header = false)
+CSV.write(ex_rxns, Tables.table(rxns4), header = false, quotestrings = true)
+CSV.write(ex_smiles, Tables.table(smiles5), header = false)
+CSV.write(ex_reaction_smiles, Tables.table(rs5), header = false)
+CSV.write(ex_mapped_reaction_smiles, Tables.table(ms5), header = false)
+CSV.write(ex_dict_carbon, D_C, header = false)</code></pre><h2 id="Pre-processing-inputs-(for-AEFM-weight-assignment)"><a class="docs-heading-anchor" href="#Pre-processing-inputs-(for-AEFM-weight-assignment)">Pre-processing inputs (for AEFM weight assignment)</a><a id="Pre-processing-inputs-(for-AEFM-weight-assignment)-1"></a><a class="docs-heading-anchor-permalink" href="#Pre-processing-inputs-(for-AEFM-weight-assignment)" title="Permalink"></a></h2><p>Assuming there is a steady state flux vector <code>v</code>, the pre-processing steps are slightly different:</p><pre><code class="language-julia hljs">## Pre-processing
+# (1) Identify problems with S/v inputs
+errors = find_atomic_chmc_input_errors(S, v)
+print(errors) # summary of errors associated with S/v
+
+# (2) Clean S/v inputs
+S2, v2, mets2, rxns2 = correct_atomic_chmc_input_errors(errors, S, v, mets, rxns)
+print(find_atomic_chmc_input_errors(S2, v2)) # confirm errors have been fixed
+
+# (3) Construct vector of smiles corresponding to the remaining metabolites in S
+smiles3 = vec(CSV.read(im_smiles, Tables.matrix, header = false))
+
+# (4) Remove pseudometabolites and reactions exceeding RXNMapper character limit
+S4, v4, mets4, rxns4, smiles4, i4 = correct_atomic_chmc_input_smiles(#
+  S2, v2, mets2, rxns2, smiles3
+)
+i4.dropped_rows_pseudometabolites # 33 pseudometabolite rows removed from S2
+i4.dropped_cols_pseudometabolites # 46 pseudometabolite reactions removed from S2
+i4.dropped_cols_rxnmapper_limit # 3 reactions in S2 removed bc of RXNMapper limit
+print(find_atomic_chmc_input_errors(S4, v4)) # confirm no errors
+
+# (5) Construct the reaction strings and map atoms via RXNMAPPER
+smiles5 = canonicalize_smiles(smiles4) # smiles strings must be canonicalized!
+rs5, ms5 = map_reaction_strings(S4, smiles5, rxns, false)
+
+# (6) Precompute atom tracing dictionary (for carbons)
+amax = get_max_atoms(smiles5, :C)
+D_C = precompute_atom_tracing_dictionary(S4, ms5, amax, :C)</code></pre><h2 id="Enumerating-AEFMs-across-all-source-metabolite-carbons"><a class="docs-heading-anchor" href="#Enumerating-AEFMs-across-all-source-metabolite-carbons">Enumerating AEFMs across all source metabolite carbons</a><a id="Enumerating-AEFMs-across-all-source-metabolite-carbons-1"></a><a class="docs-heading-anchor-permalink" href="#Enumerating-AEFMs-across-all-source-metabolite-carbons" title="Permalink"></a></h2><pre><code class="language-julia hljs"># Verbosity of AEFM enumeration function (provides a progress meter)
+verbose = true
+
+# File names
+stoich_loc = &quot;stoichiometry-matrix-processed.csv&quot;
+smiles_loc = &quot;smiles-isomeric-processed.csv&quot;
+mets_loc   = &quot;metabolites-processed.csv&quot;
+D_C_loc    = &quot;dictionary-atom-tracing-carbon.csv&quot;
+D_N_loc    = &quot;dictionary-atom-tracing-nitrogen.csv&quot;
+ms_loc     = &quot;mapped-reaction-smiles-strings-processed.csv&quot;
+rxns_loc   = &quot;reactions-processed.csv&quot;
+
+# Packages
+using CSV, Tables, MarkovWeightedEFMs, JLD2, Dates
+
+## Load final data
+# Load stoichiometry matrix
+S = Int16.(CSV.read(stoich_loc, Tables.matrix, header = false))
+
+# Load SMILES strings matching the stoichiometry rows
+smiles = vec(CSV.read(smiles_loc, Tables.matrix, header = false))
+
+# Load metabolites
+mets = vec(CSV.read(mets_loc, Tables.matrix, header = false))
+
+# Load atom tracing dictionary
+D_C = import_atom_tracing_dictionary(D_C_loc)
+
+# Load mapped reaction smiles strings
+ms = vec(CSV.read(#
+    ms_loc, Tables.matrix, delim = &#39;;&#39;, ignoreemptyrows = false, header = false
+))
+g(x) = ismissing(x) ? &quot;&quot; : x
+ms = g.(ms)
+
+# Load reactions
+rxns = String.(vec(CSV.read(rxns_loc, Tables.matrix, header = false)))
+
+## Enumerate atomic efms
+# Identify indices of all source metabolites and number of carbons/nitrogens
+srcs = get_source_metabolites(Int16.(S))
+amax_C = get_max_atoms(smiles, :C)
+
+start_time = Dates.now()
+for k in eachindex(srcs)
+    res_dir = &quot;$k-&quot; * mets[srcs[k]]
+    isdir(res_dir) || mkdir(res_dir)
+    for l in 1:amax_C[srcs[k]]
+        I = (srcs[k], l, :C)
+        res = enumerate_atomic_efms(S, ms, I, D_C; verbose = verbose)
+    end
+end
+end_time = Dates.now()
+ttime = end_time - start_time
+
+@info &quot;It took $ttime to enumerate all carbon AEFMs.&quot;</code></pre><h2 id="Computing-AEFM-weights-across-all-source-metabolite-carbons"><a class="docs-heading-anchor" href="#Computing-AEFM-weights-across-all-source-metabolite-carbons">Computing AEFM weights across all source metabolite carbons</a><a id="Computing-AEFM-weights-across-all-source-metabolite-carbons-1"></a><a class="docs-heading-anchor-permalink" href="#Computing-AEFM-weights-across-all-source-metabolite-carbons" title="Permalink"></a></h2><p>Decomposing fluxes onto AEFMs uses the function <code>steady_state_efm_distribution()</code> requires the steady state fluxes <code>v</code>:</p><pre><code class="language-julia hljs">for k in eachindex(srcs)
+    res_dir = &quot;$k-&quot; * mets[srcs[k]]
+    isdir(res_dir) || mkdir(res_dir)
+    for l in 1:amax_C[srcs[k]]
+        I = (srcs[k], l, :C)
+        res = steady_state_efm_distribution(S, v, ms, I, D_C; verbose = verbose)
+    end
+end</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../chmc-atomic-glucose/">« ACHMC (for AEFMs)</a><a class="docs-footer-nextpage" href="../../library/chmc-standard/">CHMC »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Saturday 9 November 2024 00:54">Saturday 9 November 2024</span>. Using Julia version 1.10.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
