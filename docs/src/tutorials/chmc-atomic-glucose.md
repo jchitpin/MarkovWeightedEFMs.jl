@@ -130,7 +130,6 @@ D_C = precompute_atom_tracing_dictionary(S, ms, atom_max, atom) # S must be Matr
 # Identify source metabolites
 src_mets = get_source_metabolites(S)
 max_src_met_carbons = atom_max[src_mets]
-nothing # hide
 ```
 
 ## Computing ACHMC for a given metabolite/carbon atom state

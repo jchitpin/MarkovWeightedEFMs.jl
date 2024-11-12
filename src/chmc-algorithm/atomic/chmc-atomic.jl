@@ -853,3 +853,63 @@ function chmc_to_mc_matrix(res::CHMCAtomicSummary, v::Vector{<:Real})
     return T′
 end
 
+"""
+    preprocess_all_for_atomic_chmc(#
+        S::Matrix{<:Real},
+        v::Vector{<:Real},
+        mets::Vector{String},
+        rxns::Vector{String},
+        smiles::Vector{String},
+        atom::Symbol
+    )
+
+Wrapper function to run 
+Converts CHMC transition matrix `res.T` to a Markov chain with probabilities
+taken from steady state flux vector `v`.
+
+`S` is the m by n stoichiometry matrix.
+`v` is the steady state flux vector of length n.
+`mets` is the vector of metabolite names of length m.
+`rxns` is the vector of reaction names of length n.
+`smiles` is the vector of metabolite SMILES strings of length m.
+`a` is a periodic table element symbol.
+"""
+function preprocess_all_for_atomic_chmc(#
+    S::Matrix{<:Real},
+    v::Vector{<:Real},
+    mets::Vector{String},
+    rxns::Vector{String},
+    smiles::Vector{String},
+    atom::Symbol
+)
+    errors = find_atomic_chmc_input_errors(S, v)
+    #print(errors) # summary of errors associated with S/v
+    output = correct_atomic_chmc_input_errors(errors, S, mets, rxns)
+    if !isnothing(output)
+        S = output[1]
+        mets = output[2]
+        rxns = output[3]
+    end
+    S, v, mets, rxns, smiles, logs = correct_atomic_chmc_input_smiles(S, v, mets, rxns, smiles)
+    smiles = canonicalize_smiles(smiles)
+    rs, ms = map_reaction_strings(S, smiles, rxns, false)
+    atom_max = get_max_atoms(smiles, atom)
+    D_atom = precompute_atom_tracing_dictionary(S, ms, atom_max, atom)
+
+    # Identify source metabolites
+    src_mets = get_source_metabolites(S)
+    max_src_met_atoms = atom_max[src_mets]
+
+    model_data = (#
+        S = S, v = v, mets = mets, rxns = rxns, smiles = smiles, rs = rs,
+        ms = ms
+    )
+    atom_info = (#
+        atom = atom, src_mets = src_mets,
+        max_src_met_atoms = max_src_met_atoms, D = D_atom
+    )
+    logs = (model_errors = errors, smiles_warnings = logs)
+
+    return model_data, atom_info, logs
+end
+

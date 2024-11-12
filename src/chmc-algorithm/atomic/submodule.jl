@@ -31,7 +31,9 @@ module Atomic
     export get_efm_metabolite_atom_indices
     export get_efm_reaction_atom_indices
     export chmc_to_mc_matrix
+    export preprocess_all_for_atomic_chmc
     #export compress
+
 
     include("io.jl")
     export export_atom_tracing_dictionary

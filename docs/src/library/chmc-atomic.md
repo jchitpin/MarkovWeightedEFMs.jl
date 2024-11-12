@@ -29,6 +29,7 @@ get_efm_reaction_atom_indices
 chmc_to_mc_matrix
 export_atom_tracing_dictionary
 import_atom_tracing_dictionary
+preprocess_all_for_atomic_chmc
 ```
 
 ## Index
