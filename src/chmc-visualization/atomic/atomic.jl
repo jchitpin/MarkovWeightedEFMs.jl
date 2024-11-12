@@ -20,7 +20,7 @@ Plot mapped reaction SMILES string `s` as an SVG and save to `fname` if specifie
 
 `canvas_height` is the height of the SVG.
 
-`view=true` will plot the SVG assuming a plotting backend is specified. For
+`view = true` will plot the SVG assuming a plotting backend is specified. For
 example, loading the `ElectronDisplay` package will plot the SVG to an
 Electron window.
 """
