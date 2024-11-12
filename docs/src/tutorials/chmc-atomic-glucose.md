@@ -225,8 +225,10 @@ same atom from the LHS to RHS of the reaction.
 
 Finally, the reaction and mapped reaction SMILES strings can also be plotted as
 an SVG and previewed using a package like ElectronDisplay. If `fname != ""`,
-the SVG is also saved to file. By default, `fname == ""` and the SVG is not
-saved.
+the SVG is also saved to file. By default, `fname == ""` and the SVG is
+not saved. The default canvas width and height are 1420 by 580 (pixels)
+but these can be changed. If using ElectronDisplay and the image is cut
+off, try resizing the plotting window or reducing the canvas dimensions.
 
 ```julia
 using ElectronDisplay
@@ -240,8 +242,8 @@ plot_mapped_reaction(rs[2], view=true)
 
 ```julia
 # Mapped reaction string
-plot_mapped_reaction(ms[2], view=true)
-#plot_mapped_reaction(ms[2], "\path\to\save\name.svg", view=true)
+plot_mapped_reaction(ms[2], view = true, canvas_width = 1420, canvas_height = 580)
+#plot_mapped_reaction(ms[2], "\path\to\save\name.svg", view = true,)
 ```
 
 ![Mapped reaction SMILES string](../assets/ms-2.svg)

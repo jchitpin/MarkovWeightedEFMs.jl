@@ -28,20 +28,9 @@ function plot_mapped_reaction(#
     s::String,
     fname::String = "";
     view::Bool = false,
-    canvas_width::Int64 = 3000,
-    canvas_height::Int64 = 1000,
+    canvas_width::Int64 = 1420,
+    canvas_height::Int64 = 580,
 )
-
-    # Reconstruct the original reaction strings
-    #subs, _ = split(s, ">>")
-    #max_subs = length(split(subs, "."))
-    #rms = canonicalize_and_atom_map(s)
-    #rss = join([#
-        #join(first.(rms)[1:max_subs], "."),
-        #">>",
-        #join(first.(rms)[(max_subs+1):end], ".")
-    #])
-
     # Plot reaction
     rxn = get_rxn(s)
     args = Dict{String, Any}(#
