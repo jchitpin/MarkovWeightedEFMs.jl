@@ -47,3 +47,6 @@ Note `PyCall.jl` will need to be rebuilt whenever you update your Julia version.
 See [PyCall.jl documentation](https://github.com/JuliaPy/PyCall.jl) for
 more options on setting up Python in Julia.
 
+See [Exact Python dependencies for RXNMapper](python-dependencies.md)
+for more information.
+

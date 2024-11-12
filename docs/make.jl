@@ -14,7 +14,8 @@ makedocs(#
             "index.md"
         ],
         "Installation" => Any[#
-            "installation/installation.md"
+            "installation/installation.md",
+            "installation/python-dependencies.md"
         ],
         "Tutorials" => Any[#
             "tutorials/chmc-standard-metabolic-networks.md",
