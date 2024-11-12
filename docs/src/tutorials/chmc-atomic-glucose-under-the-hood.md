@@ -76,8 +76,6 @@ smiles = [#
 
 atom = :C # carbon atom type for AEFMs
 
-mdl, atom_info, logs = preprocess_all_for_atomic_chmc(S, v, mets, rxns, smiles, atom)
-
 errors = CHMCAtomicErrorSummary(#
     0.0,     #absolute_flux_error
     Vector{Int64}(), #reactions_duplicated
@@ -401,7 +399,6 @@ res_enum = CHMCAtomicSummary(#
 
 efm_seq_1 = ["FDP", "F6P", "FDP"]
 efm_seq_2 = ["Glc", "G6P", "F6P", "FDP", "DHAP"]
-
 ```
 
 ## Inputs
