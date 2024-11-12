@@ -21,6 +21,7 @@ makedocs(#
             "tutorials/chmc-standard-metabolic-networks.md",
             "tutorials/chmc-standard-ion-channels.md",
             "tutorials/chmc-atomic-glucose.md",
+            "tutorials/chmc-atomic-glucose-under-the-hood.md",
             "tutorials/boilerplate-for-bigg-gems.md",
         ],
         "Library" => Any[#

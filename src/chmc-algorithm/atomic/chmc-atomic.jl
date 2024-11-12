@@ -863,9 +863,8 @@ end
         atom::Symbol
     )
 
-Wrapper function to run 
-Converts CHMC transition matrix `res.T` to a Markov chain with probabilities
-taken from steady state flux vector `v`.
+Wrapper function to run pre-processing functions and return the updated
+model, atomic info, and error/warning logs.
 
 `S` is the m by n stoichiometry matrix.
 `v` is the steady state flux vector of length n.

@@ -1,14 +1,17 @@
 # Boilerplate code for ACHMC analysis of BiGG models
 
-The following code is provided to quickly construct ACHMC models of BiGG
-metabolic models and others stored in the SBML file format. Each code
-block is designed to be standalone with calculations saved to file and
-re-loaded in a subsequent code block. Unfortunately, BiGG does not store
-SMILES strings so these will need to be manually compiled by the user.
+The following code is provided to construct ACHMC models of BiGG metabolic
+models (and others) stored in the SBML file format. Each code block is
+designed to be standalone with calculations saved to file and re-loaded in
+a subsequent code block. Since metabolic models can be quite complex,
+individual pre-processesing functions are used rather than the wrapper
+function `preprocess_all_for_atomic_chmc`. Unfortunately, BiGG does not
+store SMILES strings so these will need to be manually compiled by the
+user.
 
 Note we recommend starting with relatively small networks (<500
-metabolites and reactions in the original metabolic model) for
-computational feasibility.
+metabolites and reactions in the original metabolic model) for computational
+feasibility before scaling to larger ones.
 
 ## Inputs (from BiGG)
 
