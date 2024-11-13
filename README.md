@@ -58,7 +58,7 @@ Once installed, the package is loaded in a `julia` session by typing:
 julia> using MarkovWeightedEFMs
 ```
 
-Please read the docs for guided tutorials and function descriptions.
+Please read the [**docs here**](https://jchitpin.github.io/MarkovWeightedEFMs.jl/dev/) for guided tutorials and function descriptions.
 
 ## Citing MarkovWeightedEFMs.jl
 
