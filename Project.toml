@@ -1,7 +1,7 @@
 name = "MarkovWeightedEFMs"
 uuid = "027c7a2e-6f0c-49f6-bdce-894140f3c472"
 authors = ["Justin Chitpin <jchit069@uottawa.ca>"]
-version = "2.0.2"
+version = "2.1.2"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
