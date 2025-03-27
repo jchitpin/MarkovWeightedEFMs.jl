@@ -642,7 +642,10 @@ function steady_state_efm_distribution(#
     end
     v_ext = collect(keys(invD))[findfirst(==((0,0)), collect(values(invD)))]
     idx = findall(x -> v_ext ∈ x, e)
-    α = v[findfirst(==(1), S[I[1], :])] / sum(p[idx])
+    #α = v[findfirst(==(1), S[I[1], :])] / sum(p[idx])
+    rids = findall(==(1), S[I[1], :])
+    cids = [findall(!=(0), S[:, r]) for r in rids]
+    α = v[findfirst(==(1), length.(cids))] / sum(p[idx])
     w = p * α
 
     if verbose == true
