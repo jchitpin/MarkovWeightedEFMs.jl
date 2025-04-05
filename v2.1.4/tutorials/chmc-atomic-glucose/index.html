@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ACHMC (for AEFMs; quickstart) · MarkovWeightedEFMs.jl</title><meta name="title" content="ACHMC (for AEFMs; quickstart) · MarkovWeightedEFMs.jl"/><meta property="og:title" content="ACHMC (for AEFMs; quickstart) · MarkovWeightedEFMs.jl"/><meta property="twitter:title" content="ACHMC (for AEFMs; quickstart) · MarkovWeightedEFMs.jl"/><meta name="description" content="Documentation for MarkovWeightedEFMs.jl."/><meta property="og:description" content="Documentation for MarkovWeightedEFMs.jl."/><meta property="twitter:description" content="Documentation for MarkovWeightedEFMs.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.svg" alt="MarkovWeightedEFMs.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MarkovWeightedEFMs.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><span class="tocitem">Home</span><ul><li><a class="tocitem" href="../../">MarkovWeightedEFMs.jl</a></li></ul></li><li><span class="tocitem">Installation</span><ul><li><a class="tocitem" href="../../installation/installation/">Getting started</a></li><li><a class="tocitem" href="../../installation/python-dependencies/">Exact Python dependencies for RXNMapper</a></li></ul></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../chmc-standard-metabolic-networks/">CHMC (metabolic networks)</a></li><li><a class="tocitem" href="../chmc-standard-ion-channels/">CHMC (ion channels)</a></li><li class="is-active"><a class="tocitem" href>ACHMC (for AEFMs; quickstart)</a><ul class="internal"><li><a class="tocitem" href="#Inputs"><span>Inputs</span></a></li><li><a class="tocitem" href="#Pre-processing-data-(wrapper)"><span>Pre-processing data (wrapper)</span></a></li><li><a class="tocitem" href="#Computing-ACHMC-for-a-given-metabolite/carbon-atom-state"><span>Computing ACHMC for a given metabolite/carbon atom state</span></a></li><li><a class="tocitem" href="#Converting-AEFM-to-sequence-of-metabolites"><span>Converting AEFM to sequence of metabolites</span></a></li><li><a class="tocitem" href="#Visualizing-the-CHMC-and-mapped-reactions"><span>Visualizing the CHMC and mapped reactions</span></a></li></ul></li><li><a class="tocitem" href="../chmc-atomic-glucose-under-the-hood/">ACHMC (for AEFMs; under the hood)</a></li><li><a class="tocitem" href="../boilerplate-for-bigg-gems/">Boilerplate code for ACHMC analysis of BiGG models</a></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../library/chmc-standard/">CHMC</a></li><li><a class="tocitem" href="../../library/chmc-atomic/">Atomic CHMC</a></li><li><a class="tocitem" href="../../library/chmc-plots-standard/">Plotting (CHMC)</a></li><li><a class="tocitem" href="../../library/chmc-plots-atomic/">Plotting (ACHMC)</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>ACHMC (for AEFMs; quickstart)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ACHMC (for AEFMs; quickstart)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/jchitpin/MarkovWeightedEFMs.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/jchitpin/MarkovWeightedEFMs.jl/blob/main/docs/src/tutorials/chmc-atomic-glucose.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ACHMC-(for-AEFMs;-quickstart)"><a class="docs-heading-anchor" href="#ACHMC-(for-AEFMs;-quickstart)">ACHMC (for AEFMs; quickstart)</a><a id="ACHMC-(for-AEFMs;-quickstart)-1"></a><a class="docs-heading-anchor-permalink" href="#ACHMC-(for-AEFMs;-quickstart)" title="Permalink"></a></h1><p>This section shows how to use the wrapper function in MarkovWeightedEFMs.jl to enumerate and assign AEFMs weights in a simple, multispecies reaction network.</p><p><img src="../../assets/toy-network-1-achmc.png" alt="Toy multispecies network"/></p><h2 id="Inputs"><a class="docs-heading-anchor" href="#Inputs">Inputs</a><a id="Inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Inputs" title="Permalink"></a></h2><pre><code class="language-julia hljs">using MarkovWeightedEFMs
+S = [#
+  1 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0 # Glc
+  0 -1  0  0  0 -1  0  0  0  0  0  0  1  0  0  0 # ATP
+  0  1 -1  0 -1  0  0  0  0  0  0  0  0  0  0  0 # G6P
+  0  1  0  0  0  1  0  0  0  0  0  0  0 -1  0  0 # ADP
+  0  0  1 -1  0  0  0  0  0  0  0  0  0  0  0  0 # 6PG
+  0  0  0  0  1 -1  1  0  0  0  0  0  0  0  0  0 # F6P
+  0  0  0  0  0  0  1  0  0  0  0  0  0  0 -1  0 # Pi
+  0  0  0  0  0  0 -1  0  0  0  0  0  0  0  0  1 # H2O
+  0  0  0  0  0  1 -1 -1  0  0  0  0  0  0  0  0 # FDP
+  0  0  0  0  0  0  0  1 -1  1 -1  0  0  0  0  0 # G3P
+  0  0  0  0  0  0  0  1  1 -1  0 -1  0  0  0  0 # DHAP
+]
+
+v = [10, 10, 3, 3, 7, 8, 1, 7, 1, 1, 7, 7, 18, 18, 1, 1]
+
+mets = [#
+  &quot;Glc&quot;,
+  &quot;ATP&quot;,
+  &quot;G6P&quot;,
+  &quot;ADP&quot;,
+  &quot;6PG&quot;,
+  &quot;F6P&quot;,
+  &quot;Pi&quot;,
+  &quot;H2O&quot;,
+  &quot;FDP&quot;,
+  &quot;G3P&quot;,
+  &quot;DHAP&quot;
+]
+
+rxns = [#
+  &quot;Source Glc&quot;,
+  &quot;Hexokinase&quot;,
+  &quot;G6P dehydrogenase&quot;,
+  &quot;Sink 6PG&quot;,
+  &quot;Phosphoglucose isomerase&quot;,
+  &quot;6-phosphofructo-1-kinase&quot;,
+  &quot;Fructose 1,6-bisphosphatase&quot;,
+  &quot;Fructose-bisphosphate aldolase&quot;,
+  &quot;Triose phosphate isomerase&quot;,
+  &quot;Triose phosphate isomerase&quot;,
+  &quot;Sink G3P&quot;,
+  &quot;Sink DHAP&quot;,
+  &quot;Source ATP&quot;,
+  &quot;Sink ADP&quot;,
+  &quot;Sink Pi&quot;,
+  &quot;Source H2O&quot;
+]
+
+smiles = [#
+  &quot;C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O&quot;,
+  &quot;C1=NC(=C2C(=N1)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N&quot;,
+  &quot;C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)OP(=O)(O)O&quot;,
+  &quot;C1=NC(=C2C(=N1)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)O)O)O)N&quot;,
+  &quot;O=C1O[C@H](COP(=O)(O)O)[C@@H](O)[C@H](O)[C@H]1O&quot;,
+  &quot;C([C@H]([C@H]([C@@H](C(=O)CO)O)O)O)OP(=O)(O)O&quot;,
+  &quot;[O-]P(=O)([O-])[O-]&quot;,
+  &quot;O&quot;,
+  &quot;C(C1C(C(C(O1)(COP(=O)(O)O)O)O)O)OP(=O)(O)O&quot;,
+  &quot;C([C@H](C=O)O)OP(=O)(O)O&quot;,
+  &quot;C(C(=O)COP(=O)(O)O)O&quot;
+]
+
+atom = :C # carbon atom type for AEFMs</code></pre><p>We can check that the flux vector satisfies the steady state requirements.</p><pre><code class="language-julia hljs">all(S * v .== 0) # should evaluate as true</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><h2 id="Pre-processing-data-(wrapper)"><a class="docs-heading-anchor" href="#Pre-processing-data-(wrapper)">Pre-processing data (wrapper)</a><a id="Pre-processing-data-(wrapper)-1"></a><a class="docs-heading-anchor-permalink" href="#Pre-processing-data-(wrapper)" title="Permalink"></a></h2><p>The following function pre-processes the input metabolic network for computing the AEFM weights for the specified atom type.</p><pre><code class="language-julia hljs">mdl, atom_info, logs = preprocess_all_for_atomic_chmc(S, v, mets, rxns, smiles, atom)</code></pre><p>The variable <code>mdl</code> is a NamedTuple containing the updated stoichiometry matrix, flux vector, metabolite/reaction names, metabolite SMILES strings, reaction SMILES strings, and mapped reaction SMILES strings.</p><pre><code class="language-julia hljs">keys(mdl)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(:S, :ms, :rxns, :v, :mets, :rs, :smiles)</code></pre><p>The variable <code>logs</code> contains details about input metabolic network in addition to listing the pseudometabolites and pseudoreactions dropped from the network based on the input SMILES strings.</p><pre><code class="language-julia hljs">keys(logs)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(:model_errors, :smiles_warnings)</code></pre><pre><code class="language-julia hljs">print(logs.model_errors)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">############################################################
+## ERROR CHECKING STOICHIOMETRY MATRIX AND FLUX VECTOR #####
+# (1)  SUM OF ABSOLUTE FLUX RECONSTRUCTION ERROR:
+#      0.0
+#      PASSED.
+# (2)  REACTIONS THAT ARE DUPLICATES:
+#      NONE.
+#      PASSED.
+# (3)  REACTIONS WTIH ZERO FLUX:
+#      NONE.
+#      PASSED.
+# (4)  REACTIONS WTIH NEGATIVE FLUX:
+#      NONE.
+#      PASSED.
+# (5)  INTERNAL REACTIONS W/ NON-INTEGER STOICHIOMETRIES:
+#      NONE.
+#      PASSED.
+# (6)  UNIMOLECULAR SOURCE REACTIONS W/ STOICH == 1:
+#      1, 13, 16
+#      PASSED.
+# (7)  UNIMOLECULAR SOURCE REACTIONS W/ STOICH != 1:
+#      NONE.
+#      PASSED.
+# (8)  MULTIMOLECULAR SOURCE REACTIONS W/ STOICH == 1:
+#      NONE.
+#      PASSED.
+# (9)  MULTIMOLECULAR SOURCE REACTIONS W/ STOICH != 1:
+#      NONE.
+#      PASSED.
+# (10) UNIMOLECULAR SINK REACTIONS W/ STOICH == 1:
+#      4, 11, 12, 14, 15
+#      PASSED.
+# (11) UNIMOLECULAR SINK REACTIONS W/ STOICH != 1:
+#      NONE.
+#      PASSED.
+# (12) MULTIMOLECULAR SINK REACTIONS W/ STOICH == 1:
+#      NONE.
+#      PASSED.
+# (13) MULTIMOLECULAR SINK REACTIONS W/ STOICH != 1:
+#      NONE.
+#      PASSED.
+# (14) REACTIONS W/ NO SUBSTRATES OR PRODUCTS:
+#      NONE.
+#      PASSED.
+# (15) # METABOLITES PARTICIPATING IN NO REACTIONS:
+#      NONE.
+#      PASSED.
+# STATUS:
+#      PASSED. THESE INPUTS SATISFY ATOMIC CHMC REQUIREMENTS.
+############################################################</code></pre><pre><code class="language-julia hljs">logs.smiles_warnings</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(dropped_rows_pseudometabolites = Int64[], dropped_cols_pseudometabolites = Int64[], dropped_cols_rxnmapper_limit = Int64[])</code></pre><p>The variable <code>atom_info</code> contains the indices of all source metabolites in the updated network and the number of occurrences for the input atom of interest. It also contains an atom-mapping dictionary relating substrate-atom positions to product-atom positions in each reaction. These are useful for programmatically computing AEFMs across all source metabolite-atom combinations of interest.</p><pre><code class="language-julia hljs">keys(atom_info)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(:D, :atom, :max_src_met_atoms, :src_mets)</code></pre><pre><code class="language-julia hljs">atom_info.src_mets # source metabolite indices</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Int64}:
+ 1
+ 2
+ 8</code></pre><pre><code class="language-julia hljs">atom_info.max_src_met_atoms # counts of specified atom in each source metabolite</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Int64}:
+  6
+ 10
+  0</code></pre><pre><code class="language-julia hljs">atom_info.D # atom-mapping dictionary</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{NTuple{4, Int64}, Tuple{Int64, Int64}} with 62 entries:
+  (3, 2, 1, 3)  =&gt; (5, 2)
+  (2, 2, 1, 6)  =&gt; (4, 2)
+  (1, 2, 1, 2)  =&gt; (3, 2)
+  (2, 5, 1, 2)  =&gt; (4, 5)
+  (9, 1, 1, 7)  =&gt; (6, 2)
+  (6, 1, 1, 6)  =&gt; (9, 2)
+  (9, 1, 1, 8)  =&gt; (10, 1)
+  (3, 3, 1, 5)  =&gt; (6, 2)
+  (2, 9, 1, 6)  =&gt; (4, 9)
+  (3, 4, 1, 5)  =&gt; (6, 1)
+  (9, 2, 1, 7)  =&gt; (6, 1)
+  (2, 1, 1, 2)  =&gt; (4, 1)
+  (6, 2, 1, 6)  =&gt; (9, 1)
+  (9, 2, 1, 8)  =&gt; (10, 2)
+  (2, 8, 1, 2)  =&gt; (4, 8)
+  (3, 6, 1, 3)  =&gt; (5, 4)
+  (2, 6, 1, 6)  =&gt; (4, 6)
+  (2, 10, 1, 2) =&gt; (4, 10)
+  (1, 6, 1, 2)  =&gt; (3, 6)
+  ⋮             =&gt; ⋮</code></pre><h2 id="Computing-ACHMC-for-a-given-metabolite/carbon-atom-state"><a class="docs-heading-anchor" href="#Computing-ACHMC-for-a-given-metabolite/carbon-atom-state">Computing ACHMC for a given metabolite/carbon atom state</a><a id="Computing-ACHMC-for-a-given-metabolite/carbon-atom-state-1"></a><a class="docs-heading-anchor-permalink" href="#Computing-ACHMC-for-a-given-metabolite/carbon-atom-state" title="Permalink"></a></h2><p>The following atomic CHMC is rooted on the first carbon atom of the first source metabolite in the stoichiometry.</p><pre><code class="language-julia hljs">I = (atom_info.src_mets[1], 1, atom) # initial state is 1st carbon of canonicalized glucose
+res = steady_state_efm_distribution(mdl.S, mdl.v, mdl.ms, I, atom_info.D; verbose = false) # S must be Matrix{Int16}</code></pre><pre><code class="language-julia hljs">res</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CHMCAtomicSummary((1, 1, :C), @NamedTuple{EFM::Vector{Int64}, Closures::Vector{Tuple{Int64, Int64}}}[(EFM = [6, 5, 6], Closures = [(6, 5)]), (EFM = [4, 1, 2, 5, 6, 7, 4], Closures = [(8, 1)]), (EFM = [4, 1, 2, 3, 4], Closures = [(4, 1)]), (EFM = [8, 7, 8], Closures = [(9, 7)]), (EFM = [4, 1, 2, 5, 6, 7, 8, 4], Closures = [(10, 1)])], [0.09000000000000001, 0.56, 0.27, 0.01, 0.07], [1.0, 6.222222222222222, 3.0, 0.11111111111111112, 0.7777777777777778], Dict{Int64, Tuple{Int16, Int16}}(5 =&gt; (6, 6), 4 =&gt; (0, 0), 6 =&gt; (9, 4), 7 =&gt; (11, 2), 2 =&gt; (3, 1), 8 =&gt; (10, 1), 3 =&gt; (5, 3), 1 =&gt; (1, 1)), Dict{Vector{Int16}, @NamedTuple{id::Int64, children::Vector{Int16}}}([1, 2, 5, 6, 7] =&gt; (id = 7, children = [8]), [1, 2, 5, 6] =&gt; (id = 6, children = [7]), [1, 2, 5, 6, 7, 4] =&gt; (id = 8, children = []), [1] =&gt; (id = 1, children = [2]), [1, 2, 3] =&gt; (id = 3, children = []), [1, 2, 3, 4] =&gt; (id = 4, children = []), [1, 2] =&gt; (id = 2, children = [3, 5]), [1, 2, 5] =&gt; (id = 5, children = [6]), [1, 2, 5, 6, 7, 8] =&gt; (id = 9, children = []), [1, 2, 5, 6, 7, 8, 4] =&gt; (id = 10, children = [])…), sparse([4, 8, 10, 1, 2, 3, 2, 6, 5, 6, 9, 7, 7, 9], [1, 1, 1, 2, 3, 4, 5, 5, 6, 7, 7, 8, 9, 10], [1.0, 1.0, 1.0, 1.0, 0.3, 1.0, 0.7, 0.125, 1.0, 0.875, 0.125, 0.875, 0.125, 0.875], 10, 10), @NamedTuple{i::Int64, j::Int64, k::Int16}[(i = 1, j = 2, k = 2), (i = 2, j = 3, k = 3), (i = 2, j = 5, k = 5), (i = 3, j = 4, k = 4), (i = 4, j = 1, k = 4), (i = 5, j = 6, k = 6), (i = 6, j = 5, k = 7), (i = 6, j = 7, k = 8), (i = 7, j = 8, k = 12), (i = 8, j = 1, k = 12), (i = 7, j = 9, k = 10), (i = 9, j = 10, k = 11), (i = 10, j = 1, k = 11), (i = 9, j = 7, k = 9)])</code></pre><p>If we only wanted to enumerate the AEFMs, we would run:</p><pre><code class="language-julia hljs">res_enum = enumerate_atomic_efms(mdl.S, mdl.ms, I, atom_info.D, verbose = false)</code></pre><p>Both functions produce the same output structure <code>res</code>, except that the AEFM flux decomposition fields will be empty. The transition matrix will also default to uniformly distributed probabilities along each row.</p><h3 id="Output"><a class="docs-heading-anchor" href="#Output">Output</a><a id="Output-1"></a><a class="docs-heading-anchor-permalink" href="#Output" title="Permalink"></a></h3><p>The output <code>res</code> is an immutable struct with 8 fields:</p><p><code>res.i</code> is a tuple storing (i) the source metabolite index, (ii) source metabolite atom index (based on canonicalized SMILES string), and (iii) the atom type. This is a copy of the variable <code>I</code>.</p><pre><code class="language-julia hljs">res.i</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(1, 1, :C)</code></pre><p><code>res.e</code> is an array of AEFMs with all corresponding simple cycle closures.</p><pre><code class="language-julia hljs">res.e</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{@NamedTuple{EFM::Vector{Int64}, Closures::Vector{Tuple{Int64, Int64}}}}:
+ (EFM = [6, 5, 6], Closures = [(6, 5)])
+ (EFM = [4, 1, 2, 5, 6, 7, 4], Closures = [(8, 1)])
+ (EFM = [4, 1, 2, 3, 4], Closures = [(4, 1)])
+ (EFM = [8, 7, 8], Closures = [(9, 7)])
+ (EFM = [4, 1, 2, 5, 6, 7, 8, 4], Closures = [(10, 1)])</code></pre><p><code>res.p</code> is an array of AEFM probabilities normalized to one.</p><pre><code class="language-julia hljs">res.p</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{Float64}:
+ 0.09000000000000001
+ 0.56
+ 0.27
+ 0.01
+ 0.07</code></pre><p><code>res.w</code> is an array of AEFM weights normalized by the (unimolecular) reaction flux of the source metabolite.</p><pre><code class="language-julia hljs">res.w</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{Float64}:
+ 1.0
+ 6.222222222222222
+ 3.0
+ 0.11111111111111112
+ 0.7777777777777778</code></pre><p><code>res.dchmc</code> is a dictionary storing the ACHMC. The keys are the ACHMC states (composed of Markov chain states in <code>res.dmc</code>). The values are the ACHMC state and the Markov chain state children.</p><pre><code class="language-julia hljs">res.dchmc</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Vector{Int16}, @NamedTuple{id::Int64, children::Vector{Int16}}} with 10 entries:
+  [1, 2, 5, 6, 7]       =&gt; (id = 7, children = [8])
+  [1, 2, 5, 6]          =&gt; (id = 6, children = [7])
+  [1, 2, 5, 6, 7, 4]    =&gt; (id = 8, children = [])
+  [1]                   =&gt; (id = 1, children = [2])
+  [1, 2, 3]             =&gt; (id = 3, children = [])
+  [1, 2, 3, 4]          =&gt; (id = 4, children = [])
+  [1, 2]                =&gt; (id = 2, children = [3, 5])
+  [1, 2, 5]             =&gt; (id = 5, children = [6])
+  [1, 2, 5, 6, 7, 8]    =&gt; (id = 9, children = [])
+  [1, 2, 5, 6, 7, 8, 4] =&gt; (id = 10, children = [])</code></pre><p><code>res.dmc</code> is a dictionary converting Markov chain states to metabolite-atom positions. The value <code>(0, 0)</code> always corresponds to the external environment sink node (which connects back to the source metabolite-atom state).</p><pre><code class="language-julia hljs">res.dmc</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{Int64, Tuple{Int16, Int16}} with 8 entries:
+  5 =&gt; (6, 6)
+  4 =&gt; (0, 0)
+  6 =&gt; (9, 4)
+  7 =&gt; (11, 2)
+  2 =&gt; (3, 1)
+  8 =&gt; (10, 1)
+  3 =&gt; (5, 3)
+  1 =&gt; (1, 1)</code></pre><p><code>res.T</code> is a sparse array storing the ACHMC transition probability matrix.</p><pre><code class="language-julia hljs">res.T</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">10×10 SparseArrays.SparseMatrixCSC{Float64, Int64} with 14 stored entries:
+  ⋅   1.0   ⋅    ⋅    ⋅      ⋅    ⋅      ⋅      ⋅      ⋅ 
+  ⋅    ⋅   0.3   ⋅   0.7     ⋅    ⋅      ⋅      ⋅      ⋅ 
+  ⋅    ⋅    ⋅   1.0   ⋅      ⋅    ⋅      ⋅      ⋅      ⋅ 
+ 1.0   ⋅    ⋅    ⋅    ⋅      ⋅    ⋅      ⋅      ⋅      ⋅ 
+  ⋅    ⋅    ⋅    ⋅    ⋅     1.0   ⋅      ⋅      ⋅      ⋅ 
+  ⋅    ⋅    ⋅    ⋅   0.125   ⋅   0.875   ⋅      ⋅      ⋅ 
+  ⋅    ⋅    ⋅    ⋅    ⋅      ⋅    ⋅     0.875  0.125   ⋅ 
+ 1.0   ⋅    ⋅    ⋅    ⋅      ⋅    ⋅      ⋅      ⋅      ⋅ 
+  ⋅    ⋅    ⋅    ⋅    ⋅      ⋅   0.125   ⋅      ⋅     0.875
+ 1.0   ⋅    ⋅    ⋅    ⋅      ⋅    ⋅      ⋅      ⋅      ⋅ </code></pre><p><code>res.R</code> is an array of tuples storing the reaction index/indices mapped to each ACHMC transition matrix element.</p><pre><code class="language-julia hljs">res.R</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">14-element Vector{@NamedTuple{i::Int64, j::Int64, k::Int16}}:
+ (i = 1, j = 2, k = 2)
+ (i = 2, j = 3, k = 3)
+ (i = 2, j = 5, k = 5)
+ (i = 3, j = 4, k = 4)
+ (i = 4, j = 1, k = 4)
+ (i = 5, j = 6, k = 6)
+ (i = 6, j = 5, k = 7)
+ (i = 6, j = 7, k = 8)
+ (i = 7, j = 8, k = 12)
+ (i = 8, j = 1, k = 12)
+ (i = 7, j = 9, k = 10)
+ (i = 9, j = 10, k = 11)
+ (i = 10, j = 1, k = 11)
+ (i = 9, j = 7, k = 9)</code></pre><h2 id="Converting-AEFM-to-sequence-of-metabolites"><a class="docs-heading-anchor" href="#Converting-AEFM-to-sequence-of-metabolites">Converting AEFM to sequence of metabolites</a><a id="Converting-AEFM-to-sequence-of-metabolites-1"></a><a class="docs-heading-anchor-permalink" href="#Converting-AEFM-to-sequence-of-metabolites" title="Permalink"></a></h2><p>The corresponding AEFMs correspond to the movement of metabolite/atom states through the reaction network. We can convert these states into metabolites using <code>get_efm_metabolite_atom_indices</code>.  Note that there is one fewer metabolite name than AEFM metabolite indices because the pseudometabolite <code>(0, 0)</code> linking sink and source reactions is omitted.</p><pre><code class="language-julia hljs"># First AEFM
+efm_seq_1 = mets[first.(get_efm_metabolite_atom_indices(res, 1))]</code></pre><pre><code class="language-julia hljs">efm_seq_1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{String}:
+ &quot;FDP&quot;
+ &quot;F6P&quot;
+ &quot;FDP&quot;</code></pre><pre><code class="language-julia hljs"># Second AEFM
+efm_seq_2 = mets[first.(get_efm_metabolite_atom_indices(res, 2))]</code></pre><pre><code class="language-julia hljs">efm_seq_2</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{String}:
+ &quot;Glc&quot;
+ &quot;G6P&quot;
+ &quot;F6P&quot;
+ &quot;FDP&quot;
+ &quot;DHAP&quot;</code></pre><h2 id="Visualizing-the-CHMC-and-mapped-reactions"><a class="docs-heading-anchor" href="#Visualizing-the-CHMC-and-mapped-reactions">Visualizing the CHMC and mapped reactions</a><a id="Visualizing-the-CHMC-and-mapped-reactions-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-the-CHMC-and-mapped-reactions" title="Permalink"></a></h2><p>The following plotting function visualizes the ACHMC rooted on state <code>I</code>. This is only recommended for exploring ACHMCs of small networks.</p><pre><code class="language-julia hljs">using GLMakie # Makie backend
+GLMakie.activate!()
+
+plot_atomic_chmc(res, S, mets, rs)</code></pre><p>Each node in the main panel corresponds to a CHMC state (metabolite and atomic index).</p><p><img src="../../assets/toy-network-1-chmc-makie-1.png" alt="ACHMC main panel"/></p><p>Clicking on a CHMC transition will highlight that transition and display the corresponding metabolic reaction on the upper panel. The pair of purple highlighted atoms correspond to the movement of the same atom from the LHS to RHS of the reaction.</p><p><img src="../../assets/toy-network-1-chmc-makie-2.png" alt="ACHMC main and upper panel"/></p><p>Finally, the reaction and mapped reaction SMILES strings can also be plotted as an SVG and previewed using a package like ElectronDisplay. If <code>fname != &quot;&quot;</code>, the SVG is also saved to file. By default, <code>fname == &quot;&quot;</code> and the SVG is not saved. The default canvas width and height are 1420 by 580 (pixels) but these can be changed. If using ElectronDisplay and the image is cut off, try resizing the plotting window or reducing the canvas dimensions.</p><pre><code class="language-julia hljs">using ElectronDisplay
+
+# Reaction string
+plot_mapped_reaction(rs[2], view=true, canvas_width = 1420, canvas_height = 580)
+#plot_mapped_reaction(rs[2], &quot;\path\to\save\name.svg&quot;, view=true)</code></pre><p><img src="../../assets/rs-2.svg" alt="Reaction SMILES string"/></p><pre><code class="language-julia hljs"># Mapped reaction string
+plot_mapped_reaction(ms[2], view = true, canvas_width = 1420, canvas_height = 580)
+#plot_mapped_reaction(ms[2], &quot;\path\to\save\name.svg&quot;, view = true)</code></pre><p><img src="../../assets/ms-2.svg" alt="Mapped reaction SMILES string"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../chmc-standard-ion-channels/">« CHMC (ion channels)</a><a class="docs-footer-nextpage" href="../chmc-atomic-glucose-under-the-hood/">ACHMC (for AEFMs; under the hood) »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.1 on <span class="colophon-date" title="Saturday 5 April 2025 04:44">Saturday 5 April 2025</span>. Using Julia version 1.10.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,164 @@
+% Glucose
+\node[%
+    ring6,
+    xshift=+3.0cm,
+    yshift=+7.0cm % 8cm before
+] (glucose) {};
+\node[above=0.5cm of glucose.corner 2,carbon,fill=cblue,inner sep=4.0pt] (glucose_c6) {};
+\draw[carbonDraw] (glucose.corner 2) to (glucose_c6);
+\draw[fill=white] (glucose.corner 2) node[carbon,fill=black] () {};
+\draw[fill=white] (glucose.corner 3) node[carbon,fill=black] () {};
+\draw[fill=white] (glucose.corner 4) node[carbon,fill=black] () {};
+\draw[fill=white] (glucose.corner 5) node[carbon,fill=black] () {};
+\draw[fill=white] (glucose.corner 6) node[carbon,fill=black] () {};
+\node[fit=(glucose) (glucose_c6), draw=none,inner sep=5pt] (glucose_box) {};
+\node[labelFont,cblue] () at (glucose.center) {Glc};
+
+% Glucose 6-phosphate
+\node[%
+    ring6,
+    right=5.0cm of glucose
+] (g6p) {};
+\node[above=0.5cm of g6p.corner 2,carbon,fill=cblue,inner sep=4.0pt] (g6p_c6) {};
+    %line width=1.75pt
+\draw[carbonDraw] (g6p.corner 2) to (g6p_c6);
+\draw[fill=white] (g6p.corner 2) node[carbon,fill=black] () {};
+\draw[fill=white] (g6p.corner 3) node[carbon,fill=black] () {};
+\draw[fill=white] (g6p.corner 4) node[carbon,fill=black] () {};
+\draw[fill=white] (g6p.corner 5) node[carbon,fill=black] () {};
+\draw[fill=white] (g6p.corner 6) node[carbon,fill=black] () {};
+\node[fit=(g6p) (g6p_c6), draw=none,inner sep=5pt] (g6p_box) {};
+\node[labelFont,cblue] () at (g6p.center) {G6P};
+
+% Fructose 6-phosphate
+\node[%
+    ring5,
+    right=5.0cm of g6p
+] (f6p) {};
+\node[above=0.5cm of f6p.corner 2,carbon,fill=cblue,inner sep=4.0pt] (f6p_c2) {};
+\draw[carbonDraw] (f6p.corner 2) to (f6p_c2);
+\node[above=0.5cm of f6p.corner 5,carbon,fill=black] (f6p_c5) {};
+\draw[carbonDraw] (f6p.corner 5) to (f6p_c5);
+\draw[fill=white] (f6p.corner 2) node[carbon,fill=black] () {};
+\draw[fill=white] (f6p.corner 3) node[carbon,fill=black] () {};
+\draw[fill=white] (f6p.corner 4) node[carbon,fill=black] () {};
+\draw[fill=white] (f6p.corner 5) node[carbon,fill=black] () {};
+\node[above=0.4cm of f6p_c2,font=\Large] (f6p_p1) {P\textsubscript{i}};
+\draw[carbonDraw] (f6p_c2) to (f6p_p1);
+\node[fit=(f6p) (f6p_c2) (f6p_c5) (f6p_p1), draw=none,inner sep=5pt] (f6p_box) {};
+\node[labelFont,cblue] () at (f6p.center) {F6P};
+
+% Fructose 1,6-biphosphate
+\node[%
+    ring5,
+    right=5.0cm of f6p
+] (fdp) {};
+\node[above=0.5cm of fdp.corner 2,carbon,fill=cblue,inner sep=4.0pt] (fdp_c2) {};
+\draw[carbonDraw] (fdp.corner 2) to (fdp_c2);
+\node[above=0.5cm of fdp.corner 5,circle,carbon,fill=black] (fdp_c5) {};
+\draw[carbonDraw] (fdp.corner 5) to (fdp_c5);
+\draw[fill=white] (fdp.corner 2) node[carbon,fill=black] () {};
+\draw[fill=white] (fdp.corner 3) node[carbon,fill=black] () {};
+\draw[fill=white] (fdp.corner 4) node[carbon,fill=black] () {};
+\draw[fill=white] (fdp.corner 5) node[carbon,fill=black] () {};
+\node[above=0.4cm of fdp_c2,font=\Large] (fdp_p1) {P\textsubscript{i}};
+\draw[carbonDraw] (fdp_c2) to (fdp_p1);
+\node[above=0.4cm of fdp_c5,font=\Large] (fdp_p2) {P\textsubscript{i}};
+\draw[carbonDraw] (fdp_c5) to (fdp_p2);
+\node[fit=(fdp) (fdp_c2) (fdp_c5) (fdp_p1) (fdp_p2), draw=none,inner sep=5pt] (fdp_box) {};
+\node[labelFont,cblue] () at (fdp.center) {FDP};
+
+% Dihydroxyacetone phosphate
+\node[carbon, right=5.0cm of fdp.east, yshift=-1.0cm,fill=cblue,inner sep=4.0pt] (dhap_1) {};
+\node[carbon, right=5.0cm of fdp.east, yshift=-1.0cm,fill=none,draw=none] (dhap_1) {};
+\node[carbon, right=0.25cm of dhap_1,fill=black]  (dhap_2) {};
+\node[carbon, right=0.25cm of dhap_2,fill=black] (dhap_3) {};
+\node[right=0.4cm of dhap_3,font=\Large] (dhap_p) {P\textsubscript{i}};
+\draw[carbonDraw] ([xshift=2.0pt]dhap_1.east) to (dhap_2);
+\draw[carbonDraw] (dhap_2) to (dhap_3);
+\draw[carbonDraw] (dhap_3) to (dhap_p);
+\node[fit=(dhap_1) (dhap_2) (dhap_3), draw=none,inner sep=5pt] (dhap_box) {};
+\node[below=0.25cm of dhap_2,labelFont,cblue] () {DHAP};
+
+% Glycerol 3-phosphate
+\node[carbon, right=5.0cm of fdp.east, yshift=+1.0cm,fill=black] (g3p_1) {};
+\node[carbon, right=0.25cm of g3p_1,fill=black]  (g3p_2) {};
+\node[carbon, right=0.25cm of g3p_2,fill=black] (g3p_3) {};
+\node[right=0.4cm of g3p_3,font=\Large] (g3p_p) {P\textsubscript{i}};
+\draw[carbonDraw] (g3p_1) to (g3p_2);
+\draw[carbonDraw] (g3p_2) to (g3p_3);
+\draw[carbonDraw] (g3p_1) to (g3p_p);
+\node[fit=(g3p_1) (g3p_2) (g3p_3), draw=none,inner sep=5pt] (g3p_box) {};
+\node[above=0.25cm of g3p_2,labelFont] () {G3P};
+
+% 6-Phosphonoglucono-D-lactone
+\node[%
+    ring6,
+    below=2.5cm of g6p
+] (pgl) {};
+\node[above=0.5cm of pgl.corner 2,carbon,fill=black] (pgl_c6) {};
+\draw[carbonDraw] (pgl.corner 2) to (pgl_c6);
+\draw[fill=white] (pgl.corner 2) node[carbon,fill=black] () {};
+\draw[fill=white] (pgl.corner 3) node[carbon,fill=black] () {};
+\draw[fill=white] (pgl.corner 4) node[carbon,fill=black] () {};
+\draw[fill=white] (pgl.corner 5) node[carbon,fill=black] () {};
+\draw[fill=white] (pgl.corner 6) node[carbon,fill=black] () {};
+\node[fit=(pgl) (pgl_c6), draw=none,inner sep=5pt] (pgl_box) {};
+\node[labelFont] () at (pgl.center) {6PG};
+
+% Fructose 6-phosphate (silent)
+\node[%
+    ring5,
+    draw=none, fill=white,
+    right=5.0cm of pgl
+] (Sf6p) {};
+\node[above=0.5cm of Sf6p.corner 2,carbon,fill=white,draw=none] (Sf6p_c2) {};
+\node[above=0.5cm of Sf6p.corner 5,carbon,fill=white,draw=none] (Sf6p_c5) {};
+\node[above=0.4cm of Sf6p_c2,font=\Large] (Sf6p_p1) {};
+\node[fit=(Sf6p) (Sf6p_c2) (Sf6p_c5) (Sf6p_p1), draw=none,inner sep=5pt] (Sf6p_box) {};
+
+% Reaction arrows
+\draw[chmcArrow,cblue] ([xshift=-5.0cm]glucose.west) to node[midway,below,labelFont,xshift=0pt,white] {$v_r$} ([xshift=-0.75cm]glucose.west);
+
+\path[-stealth,black, line width=6pt] ([xshift=+1.0cm,yshift=1.0cm]glucose.east) edge[bend right=60,looseness=1.25] ([xshift=-1.0cm,yshift=1.0cm]g6p.west);
+\draw[chmcArrow,cblue] ([xshift=+0.75cm]glucose.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_1$} ([xshift=-0.75cm]g6p.west);
+
+\node[labelFont,right=0.50cm of glucose.east,yshift=1.4cm] (atp1) {ATP};
+\node[labelFont,left=0.50cm of g6p.west,yshift=1.4cm] (adp1) {ADP};
+
+\draw[chmcArrow,black] ([xshift=-0.1cm,yshift=+0.5cm]atp1.north west) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=-0.5cm]atp1.north);
+\draw[chmcArrow,black] ([xshift=+0.5cm]adp1.north) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=+0.1cm,yshift=+0.5cm]adp1.north east);
+
+\draw[chmcArrow] ([yshift=-0.4cm]g6p.south) to node[midway,left,labelFont,yshift=5pt,white] {$v_2$} ([yshift=-0.2cm]pgl_box.north);
+\draw[chmcArrow] ([xshift=+0.75cm]pgl.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_3$} ([xshift=-0.75cm]Sf6p.west);
+
+\draw[chmcArrow,cblue] ([xshift=+0.75cm]g6p.east) to node[midway,below,labelFont,xshift=-5pt,white] {$v_4$} ([xshift=-0.75cm]f6p.west);
+
+\path[-stealth,black, line width=3pt] ([xshift=+1.0cm,yshift=1.05cm]f6p.east) edge[bend right=60,looseness=1.25] ([xshift=-1.0cm,yshift=1.05cm]fdp.west);
+\draw[reactionArrow,-{Stealth[left]},cblue] ([xshift=+0.75cm,yshift=+0.10cm]f6p.east) to node[midway,above,labelFont,yshift=+5pt,white] {$v_5$} ([xshift=-0.75cm,yshift=+0.10cm]fdp.west);
+\draw[reactionArrow,-{Stealth[left]}] ([xshift=-0.75cm,yshift=-0.10cm]fdp.west) to node[midway,below,labelFont,yshift=-5pt,white] {$v_6$} ([xshift=+0.75cm,yshift=-0.10cm]f6p.east);
+\node[labelFont,right=0.50cm of f6p.east,yshift=1.4cm] (atp2) {ATP};
+\node[labelFont,left=0.50cm of fdp.west,yshift=1.4cm] (adp2) {ADP};
+
+\draw[chmcArrow,black,line width=3pt] ([xshift=-0.10cm,yshift=+0.5cm]atp2.north west) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=-0.5cm]atp2.north);
+\draw[chmcArrow,black,line width=3pt] ([xshift=+0.5cm]adp2.north) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=+0.1cm,yshift=+0.5cm]adp2.north east);
+
+\path[-stealth,black, line width=3pt] ([xshift=-1.0cm,yshift=-1.05cm]fdp.west) edge[bend right=60,looseness=1.25] ([xshift=+1.0cm,yshift=-1.05cm]f6p.east);
+\node[labelFont,right=0.50cm of f6p.east,yshift=-1.4cm] (pi) {P\textsubscript{i}};
+\node[labelFont,left=0.50cm of fdp.west,yshift=-1.4cm] (h2o) {H\textsubscript{2}O};
+
+\draw[chmcArrow,black,line width=3pt] ([xshift=-0.2cm,yshift=-0.0cm]pi.south) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=-0.1cm,yshift=-0.5cm]pi.south west);
+\draw[chmcArrow,black,line width=3pt] ([xshift=+0.1cm,yshift=-0.5cm]h2o.south east) to node[midway,below,labelFont,xshift=0pt,white] {} ([xshift=+0.5cm,yshift=+0.0cm]h2o.south);
+
+\draw[line width=6pt,cblue] ([xshift=+0.75cm]fdp.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_7$} ([xshift=+2.5cm]fdp.east);
+\draw[chmcArrow,black] ([xshift=+2.5cm]fdp.east) to ([xshift=-0.75cm]g3p_1.west);
+\draw[line width=6pt,cblue] ([xshift=+0.75cm]fdp.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_7$} ([xshift=+2.55cm]fdp.east);
+\draw[chmcArrow,cblue] ([xshift=+2.5cm]fdp.east) to ([xshift=-0.75cm]dhap_1.west);
+
+\draw[reactionArrow,-{Stealth[left]}] ([xshift=+0.10cm]g3p_2.south) to node[midway,right,labelFont,xshift=+0.1cm,white] {$v_9$} ([xshift=+0.10cm]dhap_2.north);
+\draw[reactionArrow,-{Stealth[left]}] ([xshift=-0.10cm]dhap_2.north) to node[midway,left,labelFont,xshift=-0.1cm,white] {$v_8$} ([xshift=-0.10cm]g3p_2.south);
+
+\draw[chmcArrow] ([xshift=+0.5cm]g3p_p.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_{11}$} ([xshift=+4.5cm]g3p_p.east);
+\draw[chmcArrow,cblue] ([xshift=+0.5cm]dhap_p.east) to node[midway,below,labelFont,xshift=0pt,white] {$v_{10}$} ([xshift=+4.5cm]dhap_p.east);
+
+
