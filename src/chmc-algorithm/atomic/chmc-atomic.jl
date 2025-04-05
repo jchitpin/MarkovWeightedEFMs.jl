@@ -643,7 +643,7 @@ function steady_state_efm_distribution(#
     v_ext = collect(keys(invD))[findfirst(==((0,0)), collect(values(invD)))]
     idx = findall(x -> v_ext ∈ x, e) # all src-to-sink AEFMs involving root
     rids = findall(==(1), S[I[1], :]) # rows of root metabolite of interest
-    cids = [sum(S[:, r]) for r in rids] # get the single source reaction idx
+    cids = [sum(abs.(S[:, r])) for r in rids] # get single source reaction idx
     α = v[rids[findfirst(==(1), cids)]] / sum(p[idx]) # proportionality constant
     w = p * α
 
