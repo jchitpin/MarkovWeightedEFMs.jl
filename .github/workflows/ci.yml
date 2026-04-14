@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@latest
         with:
-          version: '1.10'
+          version: '1.11'
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); Pkg.add(PackageSpec(name="Luxor", version="3.8.0")); Pkg.add(PackageSpec(name="MolecularGraph", version="0.17.3")); Pkg.precompile()'
       - name: Build and deploy
