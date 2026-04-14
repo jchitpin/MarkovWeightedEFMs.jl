@@ -1,0 +1,109 @@
+\tikzset{%
+  dexteritas/.cd,
+  shifted path label/.style={pos=0.5,draw=none,rectangle,auto,sloped}
+}
+\tikzset{%
+  labelled shifted path/.style args={from #1 to #2 by #3 label #4 #5}{%
+    insert path={%
+      let \p1=($(#1.east)-(#1.center)$),
+      \p2=($(#2.east)-(#2.center)$),\p3=($(#1.center)-(#2.center)$),
+      \n1={veclen(\x1,\y1)},\n2={veclen(\x2,\y2)},\n3={atan2(\y3,\x3)} in
+      (#1.{\n3+180+asin(#3/\n1)}) to node[dexteritas/shifted path label,#4]{#5}
+      (#2.{\n3-asin(#3/\n2)})
+    }
+  }
+}
+\let\oldto\to
+\renewcommand\to[1][1.4em]{%
+  \tikz[%
+    baseline=-0.5ex, shorten <=-0.5pt, shorten >=6pt
+  ] \draw[-latex,solid] (0,0) -- (#1,0);
+}
+\begin{tikzpicture}[%
+  >=latex,
+  decoration={%
+    markings,
+    mark=at position 1.0 with {\arrow{>}}
+  },
+  every node/.style={%
+    %font=\sffamily\footnotesize\itshape,
+    font=\tiny,
+    text=black,
+    text centered,
+    align=center
+  },
+  frame/.style={draw=black,inner sep=2pt}
+]
+
+  % Nodes
+  \node[lnode] (X1) {$X_{1}^{(000)}$};
+  \node[%
+    lnode,right=2.0cm of X1
+  ] (X2) {$X_{2}^{(010)}$};
+  \node[%
+    lnode,right=2.0cm of X2
+  ] (X3) {$X_{3}^{(011)}$};
+  \node[lnode,draw=none,fill=none,right=2.0cm of X3] (P1) {\footnotesize \phantom{$X_{0}^{(000)}$}};
+  \node[lnode,draw=none,fill=none,above=2.0cm of P1] (P2) {\footnotesize \phantom{$X_{0}^{(000)}$}};
+  \node[lnode,above=2.0cm of X1] (X4) {$\footnotesize X_{4}^{(100)}$};
+  \node[lnode,above=2.0cm of X2] (X5) {\footnotesize $X_{5}^{(110)}$};
+  \node[lnode,above=2.0cm of X3] (X6) {\footnotesize $X_{6}^{(111)}$};
+  \node[lnode, yshift=-1.0cm] (X7) at ($(X4)!0.5!(X5)$) {\footnotesize $X_{7}^{(100)}$};
+  \node[lnode, yshift=-1.0cm] (X8) at ($(X5)!0.5!(X6)$) {\footnotesize $X_{8}^{(110)}$};
+  \node[lnode, yshift=-1.0cm] (X9) at ($(X6)!0.5!(P2)$) {\footnotesize $X_{9}^{(111)}$};
+  \node[lnode,above=0.5cm of X5] (X10) {\footnotesize $X_{10}^{(110)}$};
+
+  % Edges
+  \draw[-] (X1) to node [] {} (X2);
+  \draw[-] (X2) to node [] {} (X3);
+  \draw[-] (X1) to node [] {} (X4);
+  \draw[-] (X2) to node [] {} (X5);
+  \draw[-] (X3) to node [] {} (X6);
+  \draw[-] (X4) to node [] {} (X5);
+  \draw[-] (X5) to node [] {} (X6);
+  \draw[-] (X5) to node [] {} (X8);
+  \draw[-] (X4) to node [] {} (X7);
+  \draw[-] (X7) to node [] {} (X8);
+  \draw[-] (X8) to node [] {} (X9);
+  \draw[-] (X6) to node [] {} (X9);
+  \draw[-] (X5) to node [] {} (X10);
+
+  % Arrows
+  \draw[-latex, labelled shifted path=from X1 to X2 by 3pt label above $ca_6$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X2 to X1 by 3pt label below $b_6$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X2 to X3 by 3pt label above $ca_4$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X3 to X2 by 3pt label below $b_4$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X4 to X5 by 3pt label above $ca_5$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X5 to X4 by 3pt label below $b_5$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X5 to X6 by 3pt label above $ca_2$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X6 to X5 by 3pt label below $b_2$, shorten >=0.6cm,shorten <=0.6cm];
+  \draw[-latex, labelled shifted path=from X4 to X7 by 3pt label above $a_9$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X7 to X4 by 3pt label below $b_9$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X5 to X8 by 3pt label above $a_9$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X8 to X5 by 3pt label below $b_9$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X6 to X9 by 3pt label above $a_{10}$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X9 to X6 by 3pt label below $b_{10}$, shorten >=0.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X5 to X10 by 3pt label above \rotatebox{-90}{$a_{11}$}, shorten >=0.1cm,shorten <=0.1cm];
+  \draw[-latex, labelled shifted path=from X10 to X5 by 3pt label above \rotatebox{+90}{$b_{11}$}, shorten >=0.1cm,shorten <=0.1cm];
+  \draw[-latex, labelled shifted path=from X7 to X8 by 3pt label above $ca_5\phantom{\hspace{1.0cm}}$, shorten >=1.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X8 to X7 by 3pt label below $b_5\phantom{\hspace{1.0cm}}$, shorten >=0.2cm,shorten <=1.2cm];
+  \draw[-latex, labelled shifted path=from X8 to X9 by 3pt label above $ca_8\phantom{\hspace{1.0cm}}$, shorten >=1.2cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X9 to X8 by 3pt label below $b_8\phantom{\hspace{1.0cm}}$, shorten >=0.2cm,shorten <=1.2cm];
+  \draw[-latex, labelled shifted path=from X1 to X4 by 3pt label above \rotatebox{-90}{$Ia_{7}$}\phantom{\hspace{0.8cm}}, shorten >=1.0cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X4 to X1 by 3pt label above \phantom{\hspace{0.8cm}}\rotatebox{+90}{$b_{7}$}, shorten >=0.2cm,shorten <=1.0cm];
+  \draw[-latex, labelled shifted path=from X2 to X5 by 3pt label above \rotatebox{-90}{$Ia_{1}$}\phantom{\hspace{0.8cm}}, shorten >=1.0cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X5 to X2 by 3pt label above \phantom{\hspace{0.8cm}}\rotatebox{+90}{$b_{1}$}, shorten >=0.2cm,shorten <=1.0cm];
+  \draw[-latex, labelled shifted path=from X3 to X6 by 3pt label above \rotatebox{-90}{$Ia_{3}$}\phantom{\hspace{0.8cm}}, shorten >=1.0cm,shorten <=0.2cm];
+  \draw[-latex, labelled shifted path=from X6 to X3 by 3pt label above \phantom{\hspace{0.8cm}}\rotatebox{+90}{$b_{3}$}, shorten >=0.2cm,shorten <=1.0cm];
+
+
+  % Dashed arrows and sequestered text
+  \draw[decorate,decoration={calligraphic brace,amplitude=3pt}]
+    ([xshift=0.5cm]X10.north) to node[midway,xshift=0.6cm] {\footnotesize Active} ([xshift=0.5cm]X10.south);
+  \draw[decorate,decoration={calligraphic brace,amplitude=3pt}]
+    ([xshift=0.5cm]X9.north) to node[midway,xshift=1.0cm] {\footnotesize Sequestered} ([xshift=0.5cm]X9.south);
+  \draw[-latex, dashed] ([yshift=-0.3cm]X1.south) to node[below,midway,yshift=8pt] {\footnotesize Ca\textsuperscript{2+}\,\rotatebox{90}{\to}} ([yshift=-0.3cm]X3.south);
+  \draw[-latex, dashed] ([xshift=-0.3cm]X1.west) to node[left,midway] {\footnotesize IP\textsubscript{3}\,\rotatebox{90}{\to}} ([xshift=-0.3cm]X4.west);
+
+\end{tikzpicture}
+

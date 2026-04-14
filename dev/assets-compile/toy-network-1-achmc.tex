@@ -1,0 +1,33 @@
+\documentclass[tikz,convert={density=500,outext=.png}]{standalone}
+
+% Packages
+\usepackage{amsmath,amsthm,bm} % math libraries
+\usepackage{sankey} % sankey/flow diagram support
+\usepackage{graphicx,xcolor} % general image and colour support
+\usepackage{caption,subcaption} % caption/subcaptions
+
+% Load custom Tikz code
+\usepackage{custom-tikz}
+
+% Colour definitions
+\definecolor{cred}{HTML}{ED1C24}
+\definecolor{cgrey}{HTML}{7F7F7F}
+\definecolor{cblue}{HTML}{00A2E8}
+\definecolor{cgreen}{HTML}{22B14C}
+\definecolor{cyellow}{HTML}{FFF200}
+\definecolor{corange}{HTML}{EA7904}
+\definecolor{cpurple}{HTML}{9100FC}
+\definecolor{efm1}{HTML}{017EC3}
+\definecolor{efm2}{HTML}{F31E26}
+\definecolor{efm3}{HTML}{019E5E}
+\definecolor{efm4}{HTML}{FBA61D}
+\definecolor{efm5}{HTML}{916237}
+
+% Font style
+\renewcommand{\familydefault}{\sfdefault}
+
+\begin{document}
+    \begin{tikzpicture}[]
+        \input{toy-network-1-achmc-input.tex}
+    \end{tikzpicture}
+\end{document}

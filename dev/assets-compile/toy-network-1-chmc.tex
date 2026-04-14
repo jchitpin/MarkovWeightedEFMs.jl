@@ -1,0 +1,45 @@
+\documentclass[varwidth,convert={density=500,outext=.png},border=0pt]{standalone}
+
+% Tikz packages
+\usepackage{tikz}
+\usetikzlibrary{%
+    patterns, plotmarks, backgrounds, shapes, arrows, calc, trees,
+    positioning, chains, shapes.geometric, decorations.pathreplacing,
+    decorations.pathmorphing, shapes.arrows, decorations.markings, quotes,
+    arrows.meta, spy, fit, matrix
+}
+
+% General includegraphics and colour support
+\usepackage{graphicx}
+\usepackage{xcolor}
+% Captions and subcaptions
+\usepackage{caption}
+\usepackage[labelformat=parens]{subcaption}
+
+% String macros (for reading in tabular data)
+\usepackage{xstring}
+
+% PGFPlots
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=newest, plot coordinates/math parser=false}
+
+%% Define node types
+\tikzstyle{lnode} = [%
+    circle,
+    draw=black,
+    minimum height=0.65cm,
+    align=center,
+    fill=none,
+    text centered,
+    inner sep=0.5pt,
+    font=\tiny
+]%
+
+\begin{document}
+    \begin{figure}
+        \centering
+        \scalebox{0.75}{\input{toy-network-1-chmc-tikz.tex}}
+    \end{figure}
+\end{document}
+

@@ -1,0 +1,160 @@
+% Tikz libraries
+\usepackage{tikz}
+\usetikzlibrary{%
+    patterns, plotmarks, backgrounds, shapes, arrows, calc, trees, positioning,
+    chains, shapes.geometric, decorations.pathreplacing,
+    decorations.pathmorphing, shapes.arrows, decorations.markings, quotes, 
+    shapes.geometric, arrows.meta, spy, fit, matrix, math, bending, graphs,
+    graphs.standard, through
+}
+
+%% Define main node types
+% Vertical split circle with either sides filled with different colours
+\makeatletter
+\tikzset{circle split part fill/.style  args={#1,#2}{%
+    alias=tmp@name,%
+        postaction={%
+            insert path={%
+                \pgfextra{%
+                    \pgfpointdiff{\pgfpointanchor{\pgf@node@name}{center}}
+                    {\pgfpointanchor{\pgf@node@name}{east}}
+                    \pgfmathsetmacro\insiderad{\pgf@x}
+                    \fill[#1] (\pgf@node@name.base)
+                        ([xshift=-\pgflinewidth]\pgf@node@name.east)
+                        arc
+                        (0:180:\insiderad-\pgflinewidth)--cycle;
+                    \fill[#2] (\pgf@node@name.base)
+                    ([xshift=\pgflinewidth]\pgf@node@name.west)
+                    arc
+                    (180:360:\insiderad-\pgflinewidth)--cycle;
+                }
+            }
+        }
+    }
+}
+\makeatother
+
+\tikzstyle{gem_node} = [% black gem node for the input metabolic network
+    circle,
+    draw=black,
+    fill=black,
+    minimum height=0.15cm
+]
+\tikzstyle{gem_node_ph} = [% placeholder gem node for input metabolic network
+    circle,
+    draw=none,
+    fill=none,
+    minimum height=0.15cm
+]
+\tikzstyle{gem_edge} = [% edge style linking gem nodes
+    -,
+    line width=2pt
+]
+\tikzstyle{carbonDraw} = [% edge style linking molecules
+    -,
+    draw,
+    line width=1.75pt
+]
+\tikzstyle{ball} = [%
+    circle,
+    draw=black,
+    minimum height=0.70cm,
+    line width=1.0pt,
+    align=center,
+    fill=cgrey,
+    fill opacity=1.0,
+    text opacity=1.0,
+    text centered,
+    text=black,
+    inner sep=0.5pt,
+    font=\LARGE
+]
+\tikzstyle{carbon} = [% individual carbon atom node
+    circle,
+    draw=black,
+    fill=white,
+    inner sep=3.0pt,
+    line width=0.75pt
+]
+\tikzstyle{carbonBlank} = [% carbon atom node for white background
+    circle,
+    draw=white,
+    fill=white,
+    inner sep=3.0pt,
+    line width=0.75pt
+]
+\tikzstyle{carbonGrey} = [% greyed out carbon atom node
+    circle,
+    draw,
+    draw opacity=0.25,
+    fill opacity=0.25,
+    inner sep=3.0pt,
+    line width=0.75pt
+]
+\tikzstyle{ring6} = [%
+    regular polygon,
+    regular polygon sides=6,
+    draw,
+    inner sep=0.5cm,
+    line width=1.75pt
+]
+\tikzstyle{ring5} = [%
+    regular polygon,
+    regular polygon sides=5,
+    draw,
+    inner sep=0.5cm,
+    line width=1.75pt
+]
+\tikzstyle{reactionArrow} = [% reaction arrow style
+    -stealth,
+    line width=3.0pt,
+    draw=black
+]
+\tikzstyle{chmcArrow} = [% reaction arrow style
+    -stealth,
+    line width=6.0pt,
+    draw=black
+]
+\tikzstyle{chmcArrow2} = [% reaction arrow style
+    -stealth,
+    line width=12.0pt,
+    draw=black
+]
+\tikzstyle{subpanelArrow} = [% reaction arrow style
+    -stealth,
+    line width=9.0pt,
+    draw=black
+]
+\tikzstyle{labelFont} = [% standard label font size
+    font=\LARGE
+]
+\tikzset{%
+    labelSankey/.style={%
+        fill=white,
+        fill opacity=0.0,
+        text opacity=1,
+        inner sep=3pt,
+        text=black!50!black!50!black,
+        inner xsep=3pt,
+        font=\Large,
+        align=center,
+    },
+}
+
+\tikzmath{%
+    \sep=0.5pt;
+    \innerspace=0.25pt;
+    \outerspace=1.0pt;
+    \rxnspace=5pt;
+    \fluxspace=0.5pt;
+    \multispace = 0.5pt;
+}
+
+\tikzset{
+    double arrow/.style args={#1 colored by #2 and #3}{
+        -stealth,line width=#1,#2, % first arrow
+        postaction={draw,-stealth,#3,line width=(#1)/2.5,
+            shorten <=(#1)/3,shorten >=2*(#1)/3}, % second arrow
+    }
+}
+%\draw[double arrow=1pt colored by blue and white]
