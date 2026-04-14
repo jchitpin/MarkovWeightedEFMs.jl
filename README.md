@@ -6,7 +6,7 @@ This package is used to decompose steady state metabolic fluxes onto
 elementary flux mode (EFM) weights and atomic elementary flux mode (AEFM)
 weights. EFM flux decomposition works only for closed-loop networks of
 unimolecular reactions. AEFM flux decomposition works on metabolic flux
-networks with known metabolite structures.
+networks with known metabolite structures and integer-based stoichiometries.
 
 Click the "docs" badge above to access package the documentation.
 
