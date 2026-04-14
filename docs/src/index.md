@@ -4,7 +4,8 @@ MarkovWeightedEFMs.jl is a package to decompose steady state metabolic
 fluxes onto elementary flux mode (EFM) weights and atomic elementary flux
 mode (AEFM) weights. EFM flux decomposition works only for closed-loop
 networks of unimolecular reactions. AEFM flux decomposition works on
-metabolic flux networks with known metabolite structures.
+metabolic flux networks with known metabolite structures and integer-based
+stoichiometries.
 
 ## Usage
 
@@ -25,12 +26,12 @@ Please cite the following papers if you use our method for (A)EFM enumeration
 and flux decomposition.
 
 Justin G. Chitpin and Theodore J. Perkins,
-*Atomic elementary flux modes explain the steady state flow of metabolites in flux networks*.
-biorXiv preprint doi: XX.XXXX/XXXX.XX.XX.XXXXXX
+*Atomic elementary flux modes explain the steady state flow of metabolites
+in flux networks*. biorXiv preprint doi: [10.1101/2024.11.13.623484](https://doi.org/10.1101/2024.11.13.623484).
 
 Justin G. Chitpin and Theodore J. Perkins,
 *A Markov constraint to uniquely identify elementary flux mode weights in unimolecular metabolic networks*.
-J Theor Biol. 2023 Nov 7;575:111632. doi: [10.1016/j.jtbi.2023.111632](https://doi.org/10.1016/j.jtbi.2023.111632)
+J Theor Biol. 2023 Nov 7;575:111632. doi: [10.1016/j.jtbi.2023.111632](https://doi.org/10.1016/j.jtbi.2023.111632).
 
 ## License
 
