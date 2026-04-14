@@ -74,4 +74,3 @@ doi: [10.1016/j.jtbi.2023.111632](https://doi.org/10.1016/j.jtbi.2023.111632).
 ## License
 
 This software is released under the MIT license.
-
