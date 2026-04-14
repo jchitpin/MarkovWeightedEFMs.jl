@@ -64,7 +64,7 @@ Please read the [**docs here**](https://jchitpin.github.io/MarkovWeightedEFMs.jl
 
 Justin G. Chitpin and Theodore J. Perkins,
 *Atomic elementary flux modes explain the steady state flow of metabolites in flux networks*.
-biorXiv preprint: https://doi.org/XX.XXXX/XXXX.XX.XX.XXXXXX
+biorXiv preprint: https://doi.org/10.1101/2024.11.13.623484
 
 Justin G. Chitpin and Theodore J. Perkins,
 *A Markov constraint to uniquely identify elementary flux mode weights in unimolecular metabolic networks*.
