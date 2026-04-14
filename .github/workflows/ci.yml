@@ -21,6 +21,7 @@ jobs:
         with:
           version: '1.11'
       - name: Install dependencies
+        shell: julia --color=yes --project=docs {0} # new
         run: |
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
